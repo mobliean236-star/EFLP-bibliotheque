@@ -1,0 +1,19 @@
+<form id="addBookForm">
+  <input type="text" id="newTitle" placeholder="Titre" required>
+  <input type="text" id="newAuthor" placeholder="Auteur" required>
+  <select id="newLang" required>
+    <option value="">Langue</option>
+    <option value="français">Français</option>
+    <option value="anglais">Anglais</option>
+    <option value="lao">Lao</option>
+  </select>
+  <select id="newCycle" required>
+    <option value="">Cycle</option>
+    <option value="cycle1">Cycle 1</option>
+    <option value="cycle2">Cycle 2</option>
+    <option value="cycle3">Cycle 3</option>
+    <option value="cycle4">Cycle 4</option>
+  </select>
+  <input type="text" id="newId" placeholder="ID unique" required>
+  <button type="submit">Ajouter</button>
+</form>
