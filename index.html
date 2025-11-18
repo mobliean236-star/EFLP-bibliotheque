@@ -2,63 +2,68 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Bibliothèque EFLP</title>
-  <link rel="stylesheet" href="style.css">
+  <title>📚 Bibliothèque EFLP</title>
 </head>
-
 <body>
-
   <h1>📚 Bibliothèque EFLP</h1>
 
-  <!-- FORMULAIRE AJOUT LIVRE -->
-  <div class="card">
-    <h2>Ajouter un livre</h2>
-
-    <input id="titre" type="text" placeholder="Titre du livre">
-    <input id="auteur" type="text" placeholder="Auteur">
-    
-    <select id="langue">
-      <option value="français">Français 🇫🇷</option>
-      <option value="anglais">Anglais 🇬🇧</option>
-      <option value="lao">Lao 🇱🇦</option>
-    </select>
-
-    <select id="cycle">
-      <option value="cycle1">Cycle 1</option>
-      <option value="cycle2">Cycle 2</option>
-      <option value="cycle3">Cycle 3</option>
-      <option value="cycle4">Cycle 4</option>
-    </select>
-
-    <button onclick="ajouterLivre()">Ajouter 📘</button>
+  <!-- Formulaire pour ajouter un livre -->
+  <div>
+    <input type="text" id="titre" placeholder="Titre du livre">
+    <input type="text" id="auteur" placeholder="Auteur">
+    <button onclick="ajouterLivre()">Ajouter Livre</button>
   </div>
 
-  <!-- LISTE DES LIVRES -->
-  <h2>Liste des livres</h2>
-  <div id="liste-livres"></div>
+  <h2>Liste des livres :</h2>
+  <ul id="listeLivres"></ul>
 
-  <script type="module" src="script.js"></script>
+  <!-- Firebase SDK via CDN -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
 
+    const firebaseConfig = {
+      apiKey: "AIzaSyBfKq__Jyfqhky8wUg8Gut6TqfgnmVp1yM",
+      authDomain: "bibliotheque-eflp.firebaseapp.com",
+      projectId: "bibliotheque-eflp",
+      storageBucket: "bibliotheque-eflp.firebasestorage.app",
+      messagingSenderId: "759572551810",
+      appId: "1:759572551810:web:10b335cf5640351e807c9b",
+      measurementId: "G-7LLGT1BCXF"
+    };
+
+    // Initialisation Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Fonction pour ajouter un livre
+    async function ajouterLivre() {
+      const titre = document.getElementById("titre").value;
+      const auteur = document.getElementById("auteur").value;
+      if(titre && auteur) {
+        await addDoc(collection(db, "livres"), { titre, auteur });
+        document.getElementById("titre").value = "";
+        document.getElementById("auteur").value = "";
+        afficherLivres();
+      } else {
+        alert("Veuillez remplir tous les champs !");
+      }
+    }
+
+    // Fonction pour afficher les livres
+    async function afficherLivres() {
+      const liste = document.getElementById("listeLivres");
+      liste.innerHTML = "";
+      const querySnapshot = await getDocs(collection(db, "livres"));
+      querySnapshot.forEach((doc) => {
+        const li = document.createElement("li");
+        li.textContent = `${doc.data().titre} - ${doc.data().auteur}`;
+        liste.appendChild(li);
+      });
+    }
+
+    // Afficher les livres au chargement
+    afficherLivres();
+  </script>
 </body>
 </html>
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBfKq__Jyfqhky8wUg8Gut6TqfgnmVp1yM",
-  authDomain: "bibliotheque-eflp.firebaseapp.com",
-  projectId: "bibliotheque-eflp",
-  storageBucket: "bibliotheque-eflp.firebasestorage.app",
-  messagingSenderId: "759572551810",
-  appId: "1:759572551810:web:10b335cf5640351e807c9b",
-  measurementId: "G-7LLGT1BCXF"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
