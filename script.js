@@ -23,3 +23,13 @@ apiKey: "AIzaSyBfKq__Jyfqhky8wUg8Gut6TqfgnmVp1yM",
   appId: "1:759572551810:web:4c96b1b907bf31a2807c9b",
   measurementId: "G-JS7G5MNL2Q"
 };
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Test : récupérer les livres existants
+db.collection("books").get().then(snapshot => {
+  snapshot.forEach(doc => {
+    console.log(doc.id, doc.data());
+  });
+});
