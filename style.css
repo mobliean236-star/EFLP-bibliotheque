@@ -1,12 +1,67 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  margin: 0;
+  padding: 20px;
 }
 
 h1 {
-    text-align: center;
+  text-align: center;
+  margin-bottom: 30px;
 }
 
-#books {
-    margin-top: 20px;
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 400px;
+  margin: 0 auto 30px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+.card input,
+.card select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0b7dda;
+}
+
+#liste-livres {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 15px;
+  padding: 10px;
+}
+
+.carte-livre {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.carte-livre button {
+  margin-top: 10px;
+  background: #4caf50;
+}
+
+.carte-livre button:hover {
+  background: #3e8e41;
 }
