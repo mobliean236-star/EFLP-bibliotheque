@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>📚 Bibliothèque EFLP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 20px auto;
+      padding: 10px;
+      background: #f7f7f7;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .formulaire, .langue-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input, select, button {
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    input, select {
+      flex: 1 1 45%;
+    }
+    button {
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #3498db;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      padding: 10px;
+      margin-bottom: 5px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+    }
+    .Français { background-color: #3498db; }
+    .Anglais { background-color: #2ecc71; }
+    .Lao { background-color: #e67e22; }
+    .actions button {
+      margin-left: 5px;
+      background-color: #e74c3c;
+      padding: 5px 8px;
+    }
+    .actions button.edit {
+      background-color: #f1c40f;
+    }
+    .actions button:hover {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <h1>📚 Bibliothèque EFLP</h1>
+
+  <!-- Formulaire pour ajouter/éditer un livre -->
+  <div class="formulaire">
+    <input type="text" id="titre" placeholder="Titre du livre">
+    <input type="text" id="auteur" placeholder="Auteur">
+    <select id="langue">
+      <option value="">Sélectionnez la langue</option>
+      <option value="Français">Français</option>
+      <option value="Anglais">Anglais</option>
+      <option value="Lao">Lao</option>
+    </select>
+    <button id="ajouterBtn" onclick="ajouterLivre()">Ajouter Livre</button>
+  </div>
+
+  <!-- Filtrer par langue -->
+  <div class="langue-filter">
+    <label for="filtreLangue">Filtrer par langue :</label>
+    <select id="filtreLangue" onchange="afficherLivres()">
+      <option value="">Toutes</option>
+      <option value="Français">Français</option>
+      <option value="Anglais">Anglais</option>
+      <option value="Lao">Lao</option>
+    </select>
+  </div>
+
+  <h2>Liste des livres :</h2>
+  <ul id="listeLivres"></ul>
+
+  <script>
+    let livres = JSON.parse(localStorage.getItem('livres')) || [];
+    let editIndex = -1;
+
+    function ajouterLivre() {
+      const titre = document.getElementById("titre").value.trim();
+      const auteur = document.getElementById("auteur").value.trim();
+      const langue = document.getElementById("langue").value;
+
+      if (!titre || !auteur || !langue) {
+        alert("Veuillez remplir tous les champs !");
+        return;
+      }
+
+      const livre = { titre, auteur, langue };
+
+      if (editIndex >= 0) {
+        livres[editIndex] = livre;
+        editIndex = -1;
+        document.getElementById("ajouterBtn").textContent = "Ajouter Livre";
+      } else {
+        livres.push(livre);
+      }
+
+      localStorage.setItem('livres', JSON.stringify(livres));
+      document.getElementById("titre").value = "";
+      document.getElementById("auteur").value = "";
+      document.getElementById("langue").value = "";
+      afficherLivres();
+    }
+
+    function afficherLivres() {
+      const liste = document.getElementById("listeLivres");
+      liste.innerHTML = "";
+      const filtre = document.getElementById("filtreLangue").value;
+
+      livres.forEach((livre, index) => {
+        if (!filtre || livre.langue === filtre) {
+          const li = document.createElement("li");
+          li.className = livre.langue;
+
+          li.innerHTML = `
+            <span>${livre.titre} - ${livre.auteur} (${livre.langue})</span>
+            <span class="actions">
+              <button class="edit" onclick="editerLivre(${index})">✏️</button>
+              <button onclick="supprimerLivre(${index})">🗑️</button>
+            </span>
+          `;
+
+          liste.appendChild(li);
+        }
+      });
+    }
+
+    function supprimerLivre(index) {
+      if (confirm("Voulez-vous vraiment supprimer ce livre ?")) {
+        livres.splice(index, 1);
+        localStorage.setItem('livres', JSON.stringify(livres));
+        afficherLivres();
+      }
+    }
+
+    function editerLivre(index) {
+      const livre = livres[index];
+      document.getElementById("titre").value = livre.titre;
+      document.getElementById("auteur").value = livre.auteur;
+      document.getElementById("langue").value = livre.langue;
+      document.getElementById("ajouterBtn").textContent = "Modifier Livre";
+      editIndex = index;
+    }
+
+    // Afficher les livres au chargement
+    afficherLivres();
+  </script>
+</body>
+</html>
