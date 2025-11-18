@@ -1,37 +1,65 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>📚 Bibliothèque EFLP</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>📚 Bibliothèque EFLP</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- QRCode library (small, via CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-
-<div id="loginPage" class="card">
-    <h2>Connexion Enseignant</h2>
-    <input type="text" id="loginId" placeholder="Identifiant">
-    <input type="password" id="loginPassword" placeholder="Mot de passe">
-    <button onclick="login()">Se connecter</button>
-    <p id="loginError" class="error"></p>
-</div>
-
-<div id="appPage" class="hidden">
-
+  <header class="topbar">
     <h1>📚 Bibliothèque EFLP</h1>
-    <p id="welcome"></p>
+  </header>
 
-    <div class="card">
-        <h2>Ajouter un livre</h2>
-        <input type="text" id="titre" placeholder="Titre">
-        <input type="text" id="auteur" placeholder="Auteur">
-        <input type="text" id="langue" placeholder="Langue (FR, LAO, EN)">
-        <button onclick="ajouterLivre()">Ajouter</button>
-    </div>
+  <main class="container">
 
-    <h2>Liste des livres</h2>
-    <ul id="listeLivres"></ul>
-</div>
+    <!-- LOGIN -->
+    <section id="loginSection" class="card">
+      <h2>Connexion Enseignant</h2>
+      <input id="loginId" placeholder="Identifiant (ex: alex)" />
+      <input id="loginPass" type="password" placeholder="Mot de passe" />
+      <div class="row">
+        <button id="btnLogin">Se connecter</button>
+        <button id="btnDemo">Mode démo</button>
+      </div>
+      <p id="loginError" class="error"></p>
+    </section>
 
-<script src="script.js"></script>
-</body>
-</html>
+    <!-- APP -->
+    <section id="appSection" class="hidden">
+
+      <div class="card row space">
+        <div>
+          <h2 id="welcome">Bienvenue</h2>
+          <p id="connectedInfo"></p>
+        </div>
+        <div class="small">
+          <button id="btnLogout" class="danger">Se déconnecter</button>
+        </div>
+      </div>
+
+      <!-- Ajouter livre -->
+      <section class="card">
+        <h3>Ajouter un livre</h3>
+        <div class="form-grid">
+          <input id="titre" placeholder="Titre" />
+          <input id="auteur" placeholder="Auteur" />
+          <select id="langue">
+            <option value="Français">Français</option>
+            <option value="Anglais">Anglais</option>
+            <option value="Lao">Lao</option>
+          </select>
+          <select id="classeAdd">
+            <option value="Cycle 1">Cycle 1</option>
+            <option value="Cycle 2">Cycle 2</option>
+            <option value="Cycle 3">Cycle 3</option>
+            <option value="Cycle 4">Cycle 4</option>
+          </select>
+        </div>
+        <div class="row">
+          <button id="btnAdd" class="primary">Ajouter le livre</button>
+          <button id="btnExport">Exporter JSON</button>
+          <label class="btn-file">
+            Importer JSON <input id=
