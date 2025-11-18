@@ -1,36 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Bibliothèque École</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Bibliothèque EFLP</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Bibliothèque de l'école</h1>
+  <h1>📚 Bibliothèque EFLP</h1>
 
-    <input type="text" id="search" placeholder="Rechercher un livre…">
+  <div class="filters">
+    <select id="langFilter">
+      <option value="">Toutes les langues</option>
+      <option value="français">Français</option>
+      <option value="anglais">Anglais</option>
+      <option value="lao">Lao</option>
+    </select>
 
-    <div id="books"></div>
+    <select id="cycleFilter">
+      <option value="">Tous les cycles</option>
+      <option value="cycle1">Cycle 1</option>
+      <option value="cycle2">Cycle 2</option>
+      <option value="cycle3">Cycle 3</option>
+      <option value="cycle4">Cycle 4</option>
+    </select>
 
-    <script src="script.js"></script>
+    <input type="text" id="search" placeholder="Rechercher un livre...">
+  </div>
+
+  <div id="books"></div>
+
+  <button id="start-scan">📷 Scanner un livre</button>
+
+  <h2>Ajouter un livre</h2>
+  <form id="addBookForm">
+    <input type="text" id="newTitle" placeholder="Titre" required>
+    <input type="text" id="newAuthor" placeholder="Auteur" required>
+    <select id="newLang" required>
+      <option value="">Langue</option>
+      <option value="français">Français</option>
+      <option value="anglais">Anglais</option>
+      <option value="lao">Lao</option>
+    </select>
+    <select id="newCycle" required>
+      <option value="">Cycle</option>
+      <option value="cycle1">Cycle 1</option>
+      <option value="cycle2">Cycle 2</option>
+      <option value="cycle3">Cycle 3</option>
+      <option value="cycle4">Cycle 4</option>
+    </select>
+    <input type="text" id="newId" placeholder="ID unique" required>
+    <button type="submit">Ajouter</button>
+  </form>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <!-- Quagga pour scanner -->
+  <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.js"></script>
+
+  <script src="script.js"></script>
 </body>
 </html>
-<form id="addBookForm">
-  <input type="text" id="newTitle" placeholder="Titre" required>
-  <input type="text" id="newAuthor" placeholder="Auteur" required>
-  <select id="newLang" required>
-    <option value="">Langue</option>
-    <option value="français">Français</option>
-    <option value="anglais">Anglais</option>
-    <option value="lao">Lao</option>
-  </select>
-  <select id="newCycle" required>
-    <option value="">Cycle</option>
-    <option value="cycle1">Cycle 1</option>
-    <option value="cycle2">Cycle 2</option>
-    <option value="cycle3">Cycle 3</option>
-    <option value="cycle4">Cycle 4</option>
-  </select>
-  <input type="text" id="newId" placeholder="ID unique" required>
-  <button type="submit">Ajouter</button>
-</form>
