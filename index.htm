@@ -1,175 +1,37 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>📚 Bibliothèque EFLP</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    .card { padding: 15px; border: 1px solid #ccc; margin-bottom: 20px; border-radius: 8px; }
-    input, select { margin: 5px 0; padding: 8px; width: 100%; }
-    button { padding: 10px 15px; margin-top: 10px; }
-    .hidden { display: none; }
-    ul { padding-left: 0; }
-    li { list-style: none; background: #f2f2f2; margin: 5px 0; padding: 8px; border-radius: 5px; }
-  </style>
+    <meta charset="UTF-8">
+    <title>📚 Bibliothèque EFLP</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h1>📚 Bibliothèque EFLP</h1>
+<div id="loginPage" class="card">
+    <h2>Connexion Enseignant</h2>
+    <input type="text" id="loginId" placeholder="Identifiant">
+    <input type="password" id="loginPassword" placeholder="Mot de passe">
+    <button onclick="login()">Se connecter</button>
+    <p id="loginError" class="error"></p>
+</div>
 
-  <!-- LOGIN PROFESSEUR -->
-  <div id="login" class="card">
-    <h2>Connexion Professeur</h2>
-    <input type="text" id="idProf" placeholder="Identifiant professeur">
-    <input type="password" id="mdpProf" placeholder="Mot de passe">
-    <button onclick="connexion()">Se connecter</button>
-  </div>
+<div id="appPage" class="hidden">
 
-  <!-- INTERFACE BIBLIOTHEQUE -->
-  <div id="app" class="hidden">
-
-    <h2 id="bonjour"></h2>
+    <h1>📚 Bibliothèque EFLP</h1>
+    <p id="welcome"></p>
 
     <div class="card">
-      <h3>Ajouter un livre</h3>
-      <input type="text" id="titre" placeholder="Titre du livre">
-      <input type="text" id="auteur" placeholder="Auteur">
-      <select id="langue">
-        <option>Lao</option>
-        <option>Français</option>
-        <option>Anglais</option>
-      </select>
-      <select id="classe">
-        <option>CP</option>
-        <option>CE1</option>
-        <option>CE2</option>
-        <option>CM1</option>
-        <option>CM2</option>
-      </select>
-      <button onclick="ajouterLivre()">Ajouter Livre</button>
+        <h2>Ajouter un livre</h2>
+        <input type="text" id="titre" placeholder="Titre">
+        <input type="text" id="auteur" placeholder="Auteur">
+        <input type="text" id="langue" placeholder="Langue (FR, LAO, EN)">
+        <button onclick="ajouterLivre()">Ajouter</button>
     </div>
 
-    <h3>📖 Livres de votre classe :</h3>
+    <h2>Liste des livres</h2>
     <ul id="listeLivres"></ul>
+</div>
 
-    <button onclick="deconnexion()" style="margin-top:20px; background:red; color:white;">Se déconnecter</button>
-  </div>
-
-<script>
-/* =======================
-   PROFESSEURS ENREGISTRÉS
-   ======================= */
-const professeurs = [
-  { id: "alex", mdp: "alex123", classe: "Cycle 4" },
-  { id: "dominique", mdp: "dom123", classe: "Cycle 2" },
-  { id: "camille", mdp: "cam123", classe: "Cycle 3" },
-  { id: "caroline", mdp: "caro123", classe: "Cycle 2" },
-  { id: "carole", mdp: "caro1", classe: "Cycle 1" }
-];
-
-/* =======================
-   CONNEXION PROFESSEUR
-   ======================= */
-function connexion() {
-  const id = document.getElementById("idProf").value;
-  const mdp = document.getElementById("mdpProf").value;
-
-  const prof = professeurs.find(p => p.id === id && p.mdp === mdp);
-
-  if (!prof) {
-    alert("Identifiant ou mot de passe incorrect.");
-    return;
-  }
-
-  localStorage.setItem("profConnecte", JSON.stringify(prof));
-  afficherApp();
-}
-
-/* =======================
-   DÉCONNEXION
-   ======================= */
-function deconnexion() {
-  localStorage.removeItem("profConnecte");
-  location.reload();
-}
-
-/* =======================
-   CHARGER INTERFACE
-   ======================= */
-function afficherApp() {
-  const prof = JSON.parse(localStorage.getItem("profConnecte"));
-  if (!prof) return;
-
-  document.getElementById("login").classList.add("hidden");
-  document.getElementById("app").classList.remove("hidden");
-
-  document.getElementById("bonjour").textContent =
-    "Bonjour " + prof.id + " — Classe : " + prof.classe;
-
-  afficherLivres();
-}
-
-/* =======================
-   STOCKAGE DES LIVRES
-   ======================= */
-function chargerLivres() {
-  return JSON.parse(localStorage.getItem("livres") || "[]");
-}
-
-function sauvegarderLivres(livres) {
-  localStorage.setItem("livres", JSON.stringify(livres));
-}
-
-/* =======================
-   AJOUTER UN LIVRE
-   ======================= */
-function ajouterLivre() {
-  const prof = JSON.parse(localStorage.getItem("profConnecte"));
-  const titre = document.getElementById("titre").value;
-  const auteur = document.getElementById("auteur").value;
-  const langue = document.getElementById("langue").value;
-  const classe = document.getElementById("classe").value;
-
-  if (!titre || !auteur) {
-    alert("Veuillez remplir tous les champs.");
-    return;
-  }
-
-  const livres = chargerLivres();
-  livres.push({
-    titre, auteur, langue, classe,
-    prof: prof.id
-  });
-
-  sauvegarderLivres(livres);
-  afficherLivres();
-
-  document.getElementById("titre").value = "";
-  document.getElementById("auteur").value = "";
-}
-
-/* =======================
-   AFFICHER LIVRES DU PROF
-   ======================= */
-function afficherLivres() {
-  const liste = document.getElementById("listeLivres");
-  liste.innerHTML = "";
-
-  const prof = JSON.parse(localStorage.getItem("profConnecte"));
-  const livres = chargerLivres().filter(l => l.prof === prof.id);
-
-  livres.forEach(livre => {
-    const li = document.createElement("li");
-    li.textContent =
-      `${livre.titre} — ${livre.auteur} (${livre.langue}) — Classe : ${livre.classe}`;
-    liste.appendChild(li);
-  });
-}
-
-/* CHARGER SI PROF DÉJÀ CONNECTÉ */
-afficherApp();
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
-
