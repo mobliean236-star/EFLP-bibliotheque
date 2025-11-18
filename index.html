@@ -32,38 +32,48 @@
       measurementId: "G-7LLGT1BCXF"
     };
 
-    // Initialisation Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Fonction pour ajouter un livre
+    // Ajouter un livre avec logs
     async function ajouterLivre() {
       const titre = document.getElementById("titre").value;
       const auteur = document.getElementById("auteur").value;
-      if(titre && auteur) {
-        await addDoc(collection(db, "livres"), { titre, auteur });
-        document.getElementById("titre").value = "";
-        document.getElementById("auteur").value = "";
-        afficherLivres();
+      console.log("Ajouter Livre :", titre, auteur); // debug
+
+      if (titre && auteur) {
+        try {
+          const docRef = await addDoc(collection(db, "livres"), { titre, auteur });
+          console.log("Livre ajouté avec ID :", docRef.id);
+          document.getElementById("titre").value = "";
+          document.getElementById("auteur").value = "";
+          afficherLivres();
+        } catch (e) {
+          console.error("Erreur Firestore :", e);
+        }
       } else {
         alert("Veuillez remplir tous les champs !");
       }
     }
 
-    // Fonction pour afficher les livres
+    // Afficher les livres avec gestion des erreurs
     async function afficherLivres() {
       const liste = document.getElementById("listeLivres");
       liste.innerHTML = "";
-      const querySnapshot = await getDocs(collection(db, "livres"));
-      querySnapshot.forEach((doc) => {
-        const li = document.createElement("li");
-        li.textContent = `${doc.data().titre} - ${doc.data().auteur}`;
-        liste.appendChild(li);
-      });
+      try {
+        const querySnapshot = await getDocs(collection(db, "livres"));
+        querySnapshot.forEach((doc) => {
+          const li = document.createElement("li");
+          li.textContent = `${doc.data().titre} - ${doc.data().auteur}`;
+          liste.appendChild(li);
+        });
+      } catch (e) {
+        console.error("Erreur affichage :", e);
+      }
     }
 
-    // Afficher les livres au chargement
     afficherLivres();
   </script>
 </body>
 </html>
+
