@@ -5,79 +5,39 @@
   <title>Bibliothèque EFLP</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+
   <h1>📚 Bibliothèque EFLP</h1>
 
-  <div class="filters">
-    <select id="langFilter">
-      <option value="">Toutes les langues</option>
-      <option value="français">Français</option>
-      <option value="anglais">Anglais</option>
-      <option value="lao">Lao</option>
+  <!-- FORMULAIRE AJOUT LIVRE -->
+  <div class="card">
+    <h2>Ajouter un livre</h2>
+
+    <input id="titre" type="text" placeholder="Titre du livre">
+    <input id="auteur" type="text" placeholder="Auteur">
+    
+    <select id="langue">
+      <option value="français">Français 🇫🇷</option>
+      <option value="anglais">Anglais 🇬🇧</option>
+      <option value="lao">Lao 🇱🇦</option>
     </select>
 
-    <select id="cycleFilter">
-      <option value="">Tous les cycles</option>
+    <select id="cycle">
       <option value="cycle1">Cycle 1</option>
       <option value="cycle2">Cycle 2</option>
       <option value="cycle3">Cycle 3</option>
       <option value="cycle4">Cycle 4</option>
     </select>
 
-    <input type="text" id="search" placeholder="Rechercher un livre...">
+    <button onclick="ajouterLivre()">Ajouter 📘</button>
   </div>
 
-  <div id="books"></div>
+  <!-- LISTE DES LIVRES -->
+  <h2>Liste des livres</h2>
+  <div id="liste-livres"></div>
 
-  <button id="start-scan">📷 Scanner un livre</button>
+  <script type="module" src="script.js"></script>
 
-  <h2>Ajouter un livre</h2>
-  <form id="addBookForm">
-    <input type="text" id="newTitle" placeholder="Titre" required>
-    <input type="text" id="newAuthor" placeholder="Auteur" required>
-    <select id="newLang" required>
-      <option value="">Langue</option>
-      <option value="français">Français</option>
-      <option value="anglais">Anglais</option>
-      <option value="lao">Lao</option>
-    </select>
-    <select id="newCycle" required>
-      <option value="">Cycle</option>
-      <option value="cycle1">Cycle 1</option>
-      <option value="cycle2">Cycle 2</option>
-      <option value="cycle3">Cycle 3</option>
-      <option value="cycle4">Cycle 4</option>
-    </select>
-    <input type="text" id="newId" placeholder="ID unique" required>
-    <button type="submit">Ajouter</button>
-  </form>
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
-  <!-- Quagga pour scanner -->
-  <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.js"></script>
-
-  <script src="script.js"></script>
 </body>
 </html>
-<form id="addBookForm">
-  <input type="text" id="newTitle" placeholder="Titre" required>
-  <input type="text" id="newAuthor" placeholder="Auteur" required>
-  <select id="newLang" required>
-    <option value="">Langue</option>
-    <option value="français">Français</option>
-    <option value="anglais">Anglais</option>
-    <option value="lao">Lao</option>
-  </select>
-  <select id="newCycle" required>
-    <option value="">Cycle</option>
-    <option value="cycle1">Cycle 1</option>
-    <option value="cycle2">Cycle 2</option>
-    <option value="cycle3">Cycle 3</option>
-    <option value="cycle4">Cycle 4</option>
-  </select>
-  <input type="text" id="newId" placeholder="ID unique" required>
-  <button type="submit">Ajouter</button>
-</form>
