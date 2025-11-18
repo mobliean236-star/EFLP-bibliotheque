@@ -17,7 +17,7 @@
       text-align: center;
       color: #2c3e50;
     }
-    .formulaire, .langue-filter {
+    .formulaire {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
@@ -86,17 +86,6 @@
     <button id="ajouterBtn" onclick="ajouterLivre()">Ajouter Livre</button>
   </div>
 
-  <!-- Filtrer par langue -->
-  <div class="langue-filter">
-    <label for="filtreLangue">Filtrer par langue :</label>
-    <select id="filtreLangue" onchange="afficherLivres()">
-      <option value="">Toutes</option>
-      <option value="Français">Français</option>
-      <option value="Anglais">Anglais</option>
-      <option value="Lao">Lao</option>
-    </select>
-  </div>
-
   <h2>Liste des livres :</h2>
   <ul id="listeLivres"></ul>
 
@@ -134,23 +123,20 @@
     function afficherLivres() {
       const liste = document.getElementById("listeLivres");
       liste.innerHTML = "";
-      const filtre = document.getElementById("filtreLangue").value;
 
       livres.forEach((livre, index) => {
-        if (!filtre || livre.langue === filtre) {
-          const li = document.createElement("li");
-          li.className = livre.langue;
+        const li = document.createElement("li");
+        li.className = livre.langue;
 
-          li.innerHTML = `
-            <span>${livre.titre} - ${livre.auteur} (${livre.langue})</span>
-            <span class="actions">
-              <button class="edit" onclick="editerLivre(${index})">✏️</button>
-              <button onclick="supprimerLivre(${index})">🗑️</button>
-            </span>
-          `;
+        li.innerHTML = `
+          <span>${livre.titre} - ${livre.auteur} (${livre.langue})</span>
+          <span class="actions">
+            <button class="edit" onclick="editerLivre(${index})">✏️</button>
+            <button onclick="supprimerLivre(${index})">🗑️</button>
+          </span>
+        `;
 
-          liste.appendChild(li);
-        }
+        liste.appendChild(li);
       });
     }
 
@@ -171,7 +157,6 @@
       editIndex = index;
     }
 
-    // Afficher les livres au chargement
     afficherLivres();
   </script>
 </body>
