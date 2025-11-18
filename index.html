@@ -5,11 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>📚 Bibliothèque EFLP</title>
   <link rel="stylesheet" href="style.css">
-
-  <script defer src="script.js"></script>
-  
+  <!-- QRCode library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  <script src="script.js" defer></script>
 </head>
-
 <body>
   <header class="topbar">
     <h1>📚 Bibliothèque EFLP</h1>
@@ -20,15 +19,14 @@
     <!-- LOGIN -->
     <section id="loginSection" class="card">
       <h2>Connexion Enseignant</h2>
-
-      <input id="loginId" placeholder="Identifiant (ex: alex)">
-      <input id="loginPass" type="password" placeholder="Mot de passe">
-
-      <div class="row">
-        <button id="btnLogin">Se connecter</button>
-        <button id="btnDemo">Mode démo</button>
+      <div class="form-row">
+        <input id="loginId" placeholder="Identifiant (ex: alex)" />
+        <input id="loginPass" type="password" placeholder="Mot de passe" />
       </div>
-
+      <div class="row">
+        <button id="btnLogin" class="primary">Se connecter</button>
+        <button id="btnDemo" class="outline">Mode démo</button>
+      </div>
       <p id="loginError" class="error"></p>
     </section>
 
@@ -38,46 +36,69 @@
       <div class="card row space">
         <div>
           <h2 id="welcome">Bienvenue</h2>
-          <p id="connectedInfo"></p>
+          <p id="connectedInfo" class="muted"></p>
         </div>
         <div class="small">
           <button id="btnLogout" class="danger">Se déconnecter</button>
         </div>
       </div>
 
-      <!-- AJOUTER LIVRE -->
-      <section class="card">
-        <h3>Ajouter un livre</h3>
-
-        <div class="form-grid">
-          <input id="titre" placeholder="Titre">
-          <input id="auteur" placeholder="Auteur">
-
-          <select id="langue">
-            <option>Français</option>
-            <option>Anglais</option>
-            <option>Lao</option>
-          </select>
-
-          <select id="classeAdd">
-            <option>Cycle 1</option>
-            <option>Cycle 2</option>
-            <option>Cycle 3</option>
-            <option>Cycle 4</option>
-          </select>
+      <!-- CONTROLS -->
+      <section class="card grid-2">
+        <div>
+          <h3>Ajouter un livre</h3>
+          <div class="form-grid">
+            <input id="titre" placeholder="Titre" />
+            <input id="auteur" placeholder="Auteur" />
+            <select id="langue">
+              <option>Français</option>
+              <option>Anglais</option>
+              <option>Lao</option>
+            </select>
+            <select id="classeAdd">
+              <option>Cycle 1</option>
+              <option>Cycle 2</option>
+              <option>Cycle 3</option>
+              <option>Cycle 4</option>
+            </select>
+          </div>
+          <div class="row">
+            <button id="btnAdd" class="primary">Ajouter</button>
+            <button id="btnClearForm" class="outline">Effacer</button>
+          </div>
         </div>
 
-        <button id="btnAdd" class="primary">Ajouter le livre</button>
+        <div>
+          <h3>Outils</h3>
+          <div class="form-grid">
+            <input id="search" placeholder="Rechercher titre ou auteur..." />
+            <input id="qrUrl" placeholder="URL (pour QR - ex: GitHub Pages)" />
+          </div>
+          <div class="row">
+            <button id="btnStats" class="outline">Statistiques</button>
+            <button id="btnQR" class="outline">Générer QR</button>
+          </div>
+          <div class="row" style="margin-top:8px;">
+            <button id="btnExport" class="outline">Exporter JSON</button>
+            <label class="btn-file outline">Importer JSON <input id="fileImport" type="file" accept=".json" /></label>
+          </div>
+          <div id="qrcode" class="qrcode"></div>
+        </div>
       </section>
 
-      <!-- LISTE DES LIVRES -->
+      <!-- BOOKS -->
       <section class="card">
         <h3>Liste des livres</h3>
-        <div id="listeLivres"></div>
+        <div id="statsBox" class="muted small hidden"></div>
+        <ul id="booksList" class="books"></ul>
       </section>
 
     </section>
 
   </main>
+
+  <footer class="footer">
+    <small>Stockage local (LocalStorage) · Export/Import JSON pour partager</small>
+  </footer>
 </body>
 </html>
