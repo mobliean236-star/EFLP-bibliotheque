@@ -3,169 +3,171 @@
 <head>
   <meta charset="UTF-8">
   <title>📚 Bibliothèque EFLP</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 700px;
-      margin: 20px auto;
-      padding: 10px;
-      background: #f7f7f7;
-      color: #333;
-    }
-    h1 {
-      text-align: center;
-      color: #2c3e50;
-    }
-    .formulaire {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    input, select, button {
-      padding: 8px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    input, select {
-      flex: 1 1 45%;
-    }
-    button {
-      background-color: #2980b9;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #3498db;
-    }
-    ul {
-      list-style-type: none;
-      padding: 0;
-    }
-    li {
-      padding: 10px;
-      margin-bottom: 5px;
-      border-radius: 5px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: #fff;
-    }
-    .Français { background-color: #3498db; }
-    .Anglais { background-color: #2ecc71; }
-    .Lao { background-color: #e67e22; }
-    .actions button {
-      margin-left: 5px;
-      background-color: #e74c3c;
-      padding: 5px 8px;
-    }
-    .actions button.edit {
-      background-color: #f1c40f;
-    }
-    .actions button:hover {
-      opacity: 0.8;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .card { padding: 15px; border: 1px solid #ccc; margin-bottom: 20px; border-radius: 8px; }
+    input, select { margin: 5px 0; padding: 8px; width: 100%; }
+    button { padding: 10px 15px; margin-top: 10px; }
+    .hidden { display: none; }
+    ul { padding-left: 0; }
+    li { list-style: none; background: #f2f2f2; margin: 5px 0; padding: 8px; border-radius: 5px; }
   </style>
 </head>
 <body>
+
   <h1>📚 Bibliothèque EFLP</h1>
 
-  <!-- Formulaire pour ajouter/éditer un livre -->
-  <div class="formulaire">
-    <input type="text" id="titre" placeholder="Titre du livre">
-    <input type="text" id="auteur" placeholder="Auteur">
-    <select id="langue">
-      <option value="">Sélectionnez la langue</option>
-      <option value="Français">Français</option>
-      <option value="Anglais">Anglais</option>
-      <option value="Lao">Lao</option>
-    </select>
-    <button id="ajouterBtn" onclick="ajouterLivre()">Ajouter Livre</button>
+  <!-- LOGIN PROFESSEUR -->
+  <div id="login" class="card">
+    <h2>Connexion Professeur</h2>
+    <input type="text" id="idProf" placeholder="Identifiant professeur">
+    <input type="password" id="mdpProf" placeholder="Mot de passe">
+    <button onclick="connexion()">Se connecter</button>
   </div>
 
-  <h2>Liste des livres :</h2>
-  <ul id="listeLivres"></ul>
+  <!-- INTERFACE BIBLIOTHEQUE -->
+  <div id="app" class="hidden">
 
-  <script>
-    let livres = JSON.parse(localStorage.getItem('livres')) || [];
-    let editIndex = -1;
+    <h2 id="bonjour"></h2>
 
-    function ajouterLivre() {
-      const titre = document.getElementById("titre").value.trim();
-      const auteur = document.getElementById("auteur").value.trim();
-      const langue = document.getElementById("langue").value;
+    <div class="card">
+      <h3>Ajouter un livre</h3>
+      <input type="text" id="titre" placeholder="Titre du livre">
+      <input type="text" id="auteur" placeholder="Auteur">
+      <select id="langue">
+        <option>Lao</option>
+        <option>Français</option>
+        <option>Anglais</option>
+      </select>
+      <select id="classe">
+        <option>CP</option>
+        <option>CE1</option>
+        <option>CE2</option>
+        <option>CM1</option>
+        <option>CM2</option>
+      </select>
+      <button onclick="ajouterLivre()">Ajouter Livre</button>
+    </div>
 
-      if (!titre || !auteur || !langue) {
-        alert("Veuillez remplir tous les champs !");
-        return;
-      }
+    <h3>📖 Livres de votre classe :</h3>
+    <ul id="listeLivres"></ul>
 
-      const livre = { titre, auteur, langue };
+    <button onclick="deconnexion()" style="margin-top:20px; background:red; color:white;">Se déconnecter</button>
+  </div>
 
-      if (editIndex >= 0) {
-        livres[editIndex] = livre;
-        editIndex = -1;
-        document.getElementById("ajouterBtn").textContent = "Ajouter Livre";
-      } else {
-        livres.push(livre);
-      }
+<script>
+/* =======================
+   PROFESSEURS ENREGISTRÉS
+   ======================= */
+const professeurs = [
+  { id: "mmeLao", mdp: "1234", classe: "CP" },
+  { id: "mJean", mdp: "abcd", classe: "CE1" },
+  { id: "mmeJulie", mdp: "pass", classe: "CM2" }
+];
 
-      localStorage.setItem('livres', JSON.stringify(livres));
-      document.getElementById("titre").value = "";
-      document.getElementById("auteur").value = "";
-      document.getElementById("langue").value = "";
-      afficherLivres();
-    }
+/* =======================
+   CONNEXION PROFESSEUR
+   ======================= */
+function connexion() {
+  const id = document.getElementById("idProf").value;
+  const mdp = document.getElementById("mdpProf").value;
 
-    function afficherLivres() {
-      const liste = document.getElementById("listeLivres");
-      liste.innerHTML = "";
+  const prof = professeurs.find(p => p.id === id && p.mdp === mdp);
 
-      livres.forEach((livre, index) => {
-        const li = document.createElement("li");
-        li.className = livre.langue;
+  if (!prof) {
+    alert("Identifiant ou mot de passe incorrect.");
+    return;
+  }
 
-        li.innerHTML = `
-          <span>${livre.titre} - ${livre.auteur} (${livre.langue})</span>
-          <span class="actions">
-            <button class="edit" onclick="editerLivre(${index})">✏️</button>
-            <button onclick="supprimerLivre(${index})">🗑️</button>
-          </span>
-        `;
-
-        liste.appendChild(li);
-      });
-    }
-
-    function supprimerLivre(index) {
-      if (confirm("Voulez-vous vraiment supprimer ce livre ?")) {
-        livres.splice(index, 1);
-        localStorage.setItem('livres', JSON.stringify(livres));
-        afficherLivres();
-      }
-    }
-
-    function editerLivre(index) {
-      const livre = livres[index];
-      document.getElementById("titre").value = livre.titre;
-      document.getElementById("auteur").value = livre.auteur;
-      document.getElementById("langue").value = livre.langue;
-      document.getElementById("ajouterBtn").textContent = "Modifier Livre";
-      {
-  titre: "Le Petit Prince",
-  auteur: "Antoine de Saint-Exupéry",
-  langue: "Français",
-  professeur: "MmeLao",
-  classe: "CP"
+  localStorage.setItem("profConnecte", JSON.stringify(prof));
+  afficherApp();
 }
 
-      editIndex = index;
-    }
+/* =======================
+   DÉCONNEXION
+   ======================= */
+function deconnexion() {
+  localStorage.removeItem("profConnecte");
+  location.reload();
+}
 
-    afficherLivres();
-  </script>
+/* =======================
+   CHARGER INTERFACE
+   ======================= */
+function afficherApp() {
+  const prof = JSON.parse(localStorage.getItem("profConnecte"));
+  if (!prof) return;
+
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+
+  document.getElementById("bonjour").textContent =
+    "Bonjour " + prof.id + " — Classe : " + prof.classe;
+
+  afficherLivres();
+}
+
+/* =======================
+   STOCKAGE DES LIVRES
+   ======================= */
+function chargerLivres() {
+  return JSON.parse(localStorage.getItem("livres") || "[]");
+}
+
+function sauvegarderLivres(livres) {
+  localStorage.setItem("livres", JSON.stringify(livres));
+}
+
+/* =======================
+   AJOUTER UN LIVRE
+   ======================= */
+function ajouterLivre() {
+  const prof = JSON.parse(localStorage.getItem("profConnecte"));
+  const titre = document.getElementById("titre").value;
+  const auteur = document.getElementById("auteur").value;
+  const langue = document.getElementById("langue").value;
+  const classe = document.getElementById("classe").value;
+
+  if (!titre || !auteur) {
+    alert("Veuillez remplir tous les champs.");
+    return;
+  }
+
+  const livres = chargerLivres();
+  livres.push({
+    titre, auteur, langue, classe,
+    prof: prof.id
+  });
+
+  sauvegarderLivres(livres);
+  afficherLivres();
+
+  document.getElementById("titre").value = "";
+  document.getElementById("auteur").value = "";
+}
+
+/* =======================
+   AFFICHER LIVRES DU PROF
+   ======================= */
+function afficherLivres() {
+  const liste = document.getElementById("listeLivres");
+  liste.innerHTML = "";
+
+  const prof = JSON.parse(localStorage.getItem("profConnecte"));
+  const livres = chargerLivres().filter(l => l.prof === prof.id);
+
+  livres.forEach(livre => {
+    const li = document.createElement("li");
+    li.textContent =
+      `${livre.titre} — ${livre.auteur} (${livre.langue}) — Classe : ${livre.classe}`;
+    liste.appendChild(li);
+  });
+}
+
+/* CHARGER SI PROF DÉJÀ CONNECTÉ */
+afficherApp();
+</script>
+
 </body>
 </html>
+
