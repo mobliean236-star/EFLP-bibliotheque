@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>📚 Bibliothèque EFLP</title>
   <link rel="stylesheet" href="style.css">
-  <!-- QRCode library (small, via CDN) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <script defer src="script.js"></script>
 </head>
+
 <body>
   <header class="topbar">
     <h1>📚 Bibliothèque EFLP</h1>
@@ -18,12 +19,15 @@
     <!-- LOGIN -->
     <section id="loginSection" class="card">
       <h2>Connexion Enseignant</h2>
-      <input id="loginId" placeholder="Identifiant (ex: alex)" />
-      <input id="loginPass" type="password" placeholder="Mot de passe" />
+
+      <input id="loginId" placeholder="Identifiant (ex: alex)">
+      <input id="loginPass" type="password" placeholder="Mot de passe">
+
       <div class="row">
         <button id="btnLogin">Se connecter</button>
         <button id="btnDemo">Mode démo</button>
       </div>
+
       <p id="loginError" class="error"></p>
     </section>
 
@@ -40,26 +44,39 @@
         </div>
       </div>
 
-      <!-- Ajouter livre -->
+      <!-- AJOUTER LIVRE -->
       <section class="card">
         <h3>Ajouter un livre</h3>
+
         <div class="form-grid">
-          <input id="titre" placeholder="Titre" />
-          <input id="auteur" placeholder="Auteur" />
+          <input id="titre" placeholder="Titre">
+          <input id="auteur" placeholder="Auteur">
+
           <select id="langue">
-            <option value="Français">Français</option>
-            <option value="Anglais">Anglais</option>
-            <option value="Lao">Lao</option>
+            <option>Français</option>
+            <option>Anglais</option>
+            <option>Lao</option>
           </select>
+
           <select id="classeAdd">
-            <option value="Cycle 1">Cycle 1</option>
-            <option value="Cycle 2">Cycle 2</option>
-            <option value="Cycle 3">Cycle 3</option>
-            <option value="Cycle 4">Cycle 4</option>
+            <option>Cycle 1</option>
+            <option>Cycle 2</option>
+            <option>Cycle 3</option>
+            <option>Cycle 4</option>
           </select>
         </div>
-        <div class="row">
-          <button id="btnAdd" class="primary">Ajouter le livre</button>
-          <button id="btnExport">Exporter JSON</button>
-          <label class="btn-file">
-            Importer JSON <input id=
+
+        <button id="btnAdd" class="primary">Ajouter le livre</button>
+      </section>
+
+      <!-- LISTE DES LIVRES -->
+      <section class="card">
+        <h3>Liste des livres</h3>
+        <div id="listeLivres"></div>
+      </section>
+
+    </section>
+
+  </main>
+</body>
+</html>
