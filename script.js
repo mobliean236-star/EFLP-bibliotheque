@@ -1,7 +1,7 @@
-/* ========= SCRIPT: Bibliothèque EFLP (1 classe par livre, sans mode démo) =========
+/* ========= SCRIPT: Bibliothèque EFLP (1 classe par livre, sans mode démo, tableau emprunts) =========
    - Placez index.html, style.css, script.js ensemble.
    - Ouvre index.html localement ou sur GitHub Pages.
-   ============================================================================= */
+================================================================================ */
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "dominique": { pass: "dom123", nom: "Dominique", classe: "Cycle 2" },
     "camille": { pass: "cam123", nom: "Camille", classe: "Cycle 3" },
     "caroline": { pass: "caro123", nom: "Caroline", classe: "Cycle 2" },
-    "carole": { pass: "caro1", nom: "Carole", classe: "Cycle 1" }
+    "carole": { pass: "caro123", nom: "Carole", classe: "Cycle 1" }
   };
 
   const STORAGE_KEY = "eflp_biblio_v2";
@@ -50,29 +50,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ---------- Data load/save ---------- */
   function loadData() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { books: [] };
-    } catch (e) {
-      return { books: [] };
-    }
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { books: [] }; }
+    catch (e) { return { books: [] }; }
   }
-
-  function saveData(data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }
-
+  function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
   if (!localStorage.getItem(STORAGE_KEY)) saveData({ books: [] });
 
   /* ---------- Current user ---------- */
-  function currentUser() {
-    return JSON.parse(localStorage.getItem("eflp_current_user") || "null");
-  }
-  function setCurrentUser(u) {
-    localStorage.setItem("eflp_current_user", JSON.stringify(u));
-  }
-  function clearCurrentUser() {
-    localStorage.removeItem("eflp_current_user");
-  }
+  function currentUser() { return JSON.parse(localStorage.getItem("eflp_current_user") || "null"); }
+  function setCurrentUser(u) { localStorage.setItem("eflp_current_user", JSON.stringify(u)); }
+  function clearCurrentUser() { localStorage.removeItem("eflp_current_user"); }
 
   /* ---------- Login ---------- */
   btnLogin.addEventListener("click", () => {
@@ -85,10 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showApp();
   });
 
-  btnLogout.addEventListener("click", () => {
-    clearCurrentUser();
-    location.reload();
-  });
+  btnLogout.addEventListener("click", () => { clearCurrentUser(); location.reload(); });
 
   function showLoginError(msg) {
     loginError.textContent = msg;
@@ -104,6 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
     welcome.textContent = `Bienvenue ${u.nom}`;
     connectedInfo.textContent = `Connecté(e) — ${u.classe}`;
     renderBooks();
+    renderBorrowedTable();
   }
 
   if (currentUser()) showApp();
@@ -137,198 +122,15 @@ document.addEventListener("DOMContentLoaded", () => {
     saveData(data);
     titreEl.value = ""; auteurEl.value = "";
     renderBooks();
+    renderBorrowedTable();
   });
 
-  btnClearForm?.addEventListener("click", ()=> {
-    titreEl.value = ""; auteurEl.value = ""; langueEl.value = "Français";
-  });
+  btnClearForm?.addEventListener("click", ()=> { titreEl.value = ""; auteurEl.value = ""; langueEl.value = "Français"; });
 
-  /* ---------- Render books (with search) ---------- */
-  searchEl?.addEventListener("input", renderBooks);
+  /* ---------- Render books (avec recherche) ---------- */
+  searchEl?.addEventListener("input", ()=> { renderBooks(); renderBorrowedTable(); });
 
   function renderBooks() {
     const data = loadData();
-    const q = (searchEl?.value || "").trim().toLowerCase();
-    booksList.innerHTML = "";
-    statsBox.classList.add("hidden");
+    const q
 
-    const filtered = data.books.filter(b => {
-      if (!q) return true;
-      return (b.titre||"").toLowerCase().includes(q) || (b.auteur||"").toLowerCase().includes(q);
-    });
-
-    if (filtered.length === 0) {
-      booksList.innerHTML = "<p class='muted'>Aucun livre trouvé.</p>";
-      return;
-    }
-
-    filtered.forEach(b => {
-      const li = document.createElement("li");
-      li.className = "book-item lang-" + (b.langue||"").replace(/\s+/g,"");
-
-      const left = document.createElement("div");
-      left.className = "book-left";
-      const title = document.createElement("div");
-      title.innerHTML = `<strong>${escapeHtml(b.titre)}</strong> — <span class="meta">${escapeHtml(b.auteur)}</span>`;
-      const statusHtml = (b.status === "available")
-        ? `<span class="badge lang-${b.langue.replace(/\s+/g,'')}">Disponible</span>`
-        : `<span class="badge lang-${b.langue.replace(/\s+/g,'')}">Emprunté par ${escapeHtml(b.borrowerClass)}</span>`;
-      const meta = document.createElement("div");
-      meta.innerHTML = `${statusHtml} <span class="meta">Langue: ${escapeHtml(b.langue)} • Ajouté: ${escapeHtml(b.addedClass)}</span>`;
-      left.appendChild(title); left.appendChild(meta);
-
-      const actions = document.createElement("div");
-      actions.className = "actions";
-
-      const borrowBtn = document.createElement("button");
-      borrowBtn.className = "action-btn";
-      borrowBtn.textContent = (b.status === "available") ? "Emprunter" : "Retourner";
-      borrowBtn.addEventListener("click", () => {
-        if (b.status === "available") promptBorrow(b.id);
-        else returnBook(b.id);
-      });
-
-      const detailsBtn = document.createElement("button");
-      detailsBtn.className = "action-btn warn";
-      detailsBtn.textContent = "Détails";
-      detailsBtn.addEventListener("click", () => showDetails(b.id));
-
-      const qrBtn = document.createElement("button");
-      qrBtn.className = "action-btn";
-      qrBtn.textContent = "QR";
-      qrBtn.addEventListener("click", ()=> generateQRForBook(b));
-
-      const delBtn = document.createElement("button");
-      delBtn.className = "action-btn danger";
-      delBtn.textContent = "Supprimer";
-      delBtn.addEventListener("click", ()=> {
-        if (confirm("Supprimer ce livre ?")) deleteBook(b.id);
-      });
-
-      actions.appendChild(borrowBtn);
-      actions.appendChild(detailsBtn);
-      actions.appendChild(qrBtn);
-      actions.appendChild(delBtn);
-
-      li.appendChild(left); li.appendChild(actions);
-      booksList.appendChild(li);
-    });
-  }
-
-  /* ---------- Borrow / Return / Details / Delete ---------- */
-  function promptBorrow(bookId) {
-    const data = loadData();
-    const book = data.books.find(x => x.id === bookId);
-    if (!book) return alert("Livre introuvable.");
-    const defaultClass = currentUser()?.classe || book.addedClass || "Cycle 1";
-    const borrowerClass = prompt("Quelle classe emprunte ce livre ? (ex: Cycle 2, CE1)", defaultClass);
-    if (!borrowerClass) return;
-    const borrowerName = prompt("Nom de l'élève (optionnel)", "");
-    book.status = "borrowed";
-    book.borrowerClass = borrowerClass.trim();
-    book.borrowerName = borrowerName ? borrowerName.trim() : null;
-    book.borrowDate = (new Date()).toISOString();
-    saveData(data);
-    renderBooks();
-  }
-
-  function returnBook(bookId) {
-    const data = loadData();
-    const book = data.books.find(x => x.id === bookId);
-    if (!book) return;
-    book.status = "available";
-    book.borrowerClass = null;
-    book.borrowerName = null;
-    book.borrowDate = null;
-    saveData(data);
-    renderBooks();
-  }
-
-  function showDetails(bookId) {
-    const data = loadData();
-    const b = data.books.find(x => x.id === bookId);
-    if (!b) return alert("Introuvable");
-    const details = [
-      `Titre: ${b.titre}`,
-      `Auteur: ${b.auteur}`,
-      `Langue: ${b.langue}`,
-      `Ajouté par: ${b.addedBy || "—" } (classe ${b.addedClass || "—"})`,
-      `Statut: ${b.status}`,
-      b.status === "borrowed" ? `Emprunté par: ${b.borrowerClass}${b.borrowerName? " — élève: "+b.borrowerName : ""}\nDate: ${b.borrowDate}` : ""
-    ].filter(Boolean).join("\n");
-    alert(details);
-  }
-
-  function deleteBook(bookId) {
-    const data = loadData();
-    data.books = data.books.filter(b => b.id !== bookId);
-    saveData(data);
-    renderBooks();
-  }
-
-  /* ---------- QR per book ---------- */
-  function generateQRForBook(book) {
-    qrcodeBox.innerHTML = "";
-    const url = qrUrl.value.trim();
-    if (!url) {
-      alert("Entre d'abord une URL dans le champ QR (ex: ton site GitHub Pages)");
-      return;
-    }
-    const fullUrl = url + (url.includes("#") ? "" : "#") + "book-" + book.id;
-    new QRCode(qrcodeBox, { text: fullUrl, width: 160, height: 160 });
-  }
-
-  /* ---------- Stats ---------- */
-  btnStats.addEventListener("click", () => {
-    const data = loadData();
-    const total = data.books.length;
-    let borrowed = 0;
-    const byLang = {};
-    const byClass = {};
-    data.books.forEach(b => {
-      byLang[b.langue] = (byLang[b.langue]||0) + 1;
-      if (b.status === "borrowed") borrowed++;
-      const c = b.addedClass || "—";
-      byClass[c] = (byClass[c]||0) + 1;
-    });
-    statsBox.classList.remove("hidden");
-    statsBox.innerHTML = `<strong>Statistiques</strong><br>
-      Total livres: ${total} • Empruntés: ${borrowed}<br>
-      Langues: ${Object.entries(byLang).map(([k,v])=>`${k}: ${v}`).join(" • ")}<br>
-      Par classe: ${Object.entries(byClass).map(([k,v])=>`${k}: ${v}`).join(" • ")}`;
-  });
-
-  /* ---------- Export / Import ---------- */
-  btnExport.addEventListener("click", () => {
-    const data = loadData();
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "eflp_bibliotheque_export.json";
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-  });
-
-  fileImport?.addEventListener("change", (e) => {
-    const f = e.target.files[0];
-    if (!f) return;
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-      try {
-        const parsed = JSON.parse(ev.target.result);
-        if (!Array.isArray(parsed.books)) throw new Error("Fichier JSON invalide (attendu { books: [...] })");
-        saveData(parsed);
-        alert("Import réussi !");
-        renderBooks();
-      } catch(err) {
-        alert("Erreur import: " + (err.message || err));
-      }
-    };
-    reader.readAsText(f);
-  });
-
-  // initial render
-  renderBooks();
-
-});
