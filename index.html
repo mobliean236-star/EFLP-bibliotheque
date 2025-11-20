@@ -8,12 +8,14 @@
 </head>
 <body>
   <h1>Connexion Professeurs</h1>
-  <form id="loginForm">
-    <input type="text" id="username" placeholder="Identifiant" required>
-    <input type="password" id="password" placeholder="Mot de passe" required>
-    <button type="submit">Se connecter</button>
-  </form>
-
+  <div class="login-container">
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Identifiant" required>
+      <input type="password" id="password" placeholder="Mot de passe" required>
+      <button type="submit">Se connecter</button>
+      <div id="errorMsg" style="color:red; margin-top:10px;"></div>
+    </form>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
