@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>📚 Bibliothèque EFLP</title>
   <link rel="stylesheet" href="style.css">
-  <!-- QRCode library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
   <script src="script.js" defer></script>
 </head>
@@ -55,12 +54,6 @@
               <option>Anglais</option>
               <option>Lao</option>
             </select>
-            <select id="classeAdd">
-              <option>Cycle 1</option>
-              <option>Cycle 2</option>
-              <option>Cycle 3</option>
-              <option>Cycle 4</option>
-            </select>
           </div>
           <div class="row">
             <button id="btnAdd" class="primary">Ajouter</button>
@@ -80,7 +73,10 @@
           </div>
           <div class="row" style="margin-top:8px;">
             <button id="btnExport" class="outline">Exporter JSON</button>
-            <label class="btn-file outline">Importer JSON <input id="fileImport" type="file" accept=".json" /></label>
+            <label class="btn-file outline">
+              Importer JSON
+              <input id="fileImport" type="file" accept=".json" />
+            </label>
           </div>
           <div id="qrcode" class="qrcode"></div>
         </div>
@@ -89,8 +85,13 @@
       <!-- BOOKS -->
       <section class="card">
         <h3>Liste des livres</h3>
-        <div id="statsBox" class="muted small hidden"></div>
         <ul id="booksList" class="books"></ul>
+      </section>
+
+      <!-- LOANS -->
+      <section class="card">
+        <h3>Livres empruntés</h3>
+        <div id="loansTable"></div>
       </section>
 
     </section>
