@@ -3,23 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Emprunts - Bibliothèque EFLP</title>
+  <title>Bibliothèque EFLP</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Tableau des Emprunts</h1>
+  <h1>Bibliothèque EFLP</h1>
+
+  <!-- Barre de recherche -->
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Rechercher un livre par titre, auteur ou langue">
+  </div>
+
+  <!-- Liste de tous les livres -->
+  <h2>Liste de tous les livres</h2>
+  <ul id="liste-livres">
+    <!-- Rempli automatiquement par script.js -->
+  </ul>
+
+  <!-- Tableau des emprunts -->
+  <h2>Livres empruntés</h2>
   <table id="tableau-emprunts">
     <thead>
       <tr>
         <th>Nom de l'élève</th>
         <th>Classe</th>
-        <th>Nom du livre + Date</th>
+        <th>Nom du livre + date</th>
       </tr>
     </thead>
     <tbody>
       <!-- Rempli automatiquement par script.js -->
     </tbody>
   </table>
+
   <script src="script.js"></script>
 </body>
 </html>
