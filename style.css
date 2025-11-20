@@ -46,6 +46,7 @@ table {
   width: 90%;
   margin: auto;
   border-collapse: collapse;
+  margin-bottom: 50px;
 }
 
 th, td {
@@ -57,4 +58,20 @@ th, td {
 th {
   background-color: #4CAF50;
   color: white;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+}
+
+table tbody {
+  display: block;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+table thead, table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
 }
