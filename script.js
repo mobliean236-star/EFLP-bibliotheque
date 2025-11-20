@@ -1,48 +1,74 @@
-// Vérifie si un prof est connecté
-const profConnecte = localStorage.getItem('profConnecte');
-if (!profConnecte) {
+// Vérifier si le prof est connecté
+if (!localStorage.getItem("profConnecte")) {
   window.location.href = "index.html";
 }
 
-// Récupération et affichage des livres
-fetch('livres.json')
-  .then(res => res.json())
-  .then(data => {
-    const listeLivres = document.getElementById('liste-livres');
-    const tbody = document.querySelector('#tableau-emprunts tbody');
+// Sélecteurs HTML
+const inputJson = document.getElementById("importJson");
+const listeLivres = document.getElementById("liste-livres");
+const tableauEmprunts = document.querySelector("#tableau-emprunts tbody");
+const searchInput = document.getElementById("searchInput");
 
-    // Affiche tous les livres
-    data.forEach(livre => {
-      const li = document.createElement('li');
-      li.textContent = `${livre.titre} (${livre.auteur}, ${livre.langue})`;
-      li.dataset.titre = livre.titre.toLowerCase();
-      li.dataset.auteur = livre.auteur.toLowerCase();
-      li.dataset.langue = livre.langue.toLowerCase();
-      listeLivres.appendChild(li);
+// Stockage du JSON importé
+let livres = [];
 
-      // Si le livre est emprunté, ajoute au tableau emprunts
-      if (livre.nomEleve && livre.classe && livre.dateEmprunt) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${livre.nomEleve}</td>
-          <td>${livre.classe}</td>
-          <td>${livre.titre} (${livre.auteur}, ${livre.langue}) - ${livre.dateEmprunt}</td>
-        `;
-        tbody.appendChild(tr);
-      }
-    });
+// === Importation JSON ===
+inputJson.addEventListener("change", function () {
+  const file = this.files[0];
+  if (!file) return;
 
-    // Recherche
-    const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', () => {
-      const query = searchInput.value.toLowerCase();
-      document.querySelectorAll('#liste-livres li').forEach(li => {
-        const match = li.dataset.titre.includes(query) ||
-                      li.dataset.auteur.includes(query) ||
-                      li.dataset.langue.includes(query);
-        li.style.display = match ? 'list-item' : 'none';
-      });
-    });
-  })
-  .catch(err => console.error("Erreur JSON :", err));
+  const reader = new FileReader();
+
+  reader.onload = function (e) {
+    try {
+      livres = JSON.parse(e.target.result);
+      afficherLivres();
+      afficherEmprunts();
+    } catch (error) {
+      alert("⚠️ Erreur : le fichier JSON n'est pas valide.");
+    }
+  };
+
+  reader.readAsText(file);
+});
+
+// === Affiche tous les livres dans la liste ===
+function afficherLivres() {
+  listeLivres.innerHTML = "";
+
+  livres.forEach(livre => {
+    const li = document.createElement("li");
+    li.textContent = `${livre.titre || "Titre inconnu"} (${livre.auteur || "Auteur ?"} / ${livre.langue || "Langue ?"})`;
+    li.dataset.search = `${livre.titre} ${livre.auteur} ${livre.langue}`.toLowerCase();
+    listeLivres.appendChild(li);
+  });
+}
+
+// === Affiche les livres empruntés ===
+function afficherEmprunts() {
+  tableauEmprunts.innerHTML = "";
+
+  livres.forEach(livre => {
+    if (livre.nomEleve && livre.classe && livre.dateEmprunt) {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${livre.nomEleve}</td>
+        <td>${livre.classe}</td>
+        <td>${livre.titre || "Titre ?"} - ${livre.dateEmprunt}</td>
+      `;
+
+      tableauEmprunts.appendChild(tr);
+    }
+  });
+}
+
+// === Recherche ===
+searchInput.addEventListener("input", () => {
+  const q = searchInput.value.toLowerCase();
+
+  document.querySelectorAll("#liste-livres li").forEach(li => {
+    li.style.display = li.dataset.search.includes(q) ? "list-item" : "none";
+  });
+});
 
