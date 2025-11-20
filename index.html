@@ -1,104 +1,45 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>📚 Bibliothèque EFLP</title>
   <link rel="stylesheet" href="style.css">
-  <!-- QRCode library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
-  <script src="script.js" defer></script>
 </head>
 <body>
-  <header class="topbar">
-    <h1>📚 Bibliothèque EFLP</h1>
-  </header>
+  <h1>📚 Bibliothèque EFLP</h1>
 
-  <main class="container">
+  <!-- FORMULAIRE LOGIN -->
+  <div id="loginDiv">
+    <h2>Connexion</h2>
+    <input type="text" id="username" placeholder="Nom d'utilisateur">
+    <input type="password" id="password" placeholder="Mot de passe">
+    <button onclick="login()">Se connecter</button>
+    <p id="loginError" style="color:red;"></p>
+  </div>
 
-    <!-- LOGIN -->
-    <section id="loginSection" class="card">
-      <h2>Connexion Enseignant</h2>
-      <div class="form-row">
-        <input id="loginId" placeholder="Identifiant (ex: alex)" />
-        <input id="loginPass" type="password" placeholder="Mot de passe" />
-      </div>
-      <div class="row">
-        <button id="btnLogin" class="primary">Se connecter</button>
-        <button id="btnDemo" class="outline">Mode démo</button>
-      </div>
-      <p id="loginError" class="error"></p>
-    </section>
+  <!-- TABLEAU DES EMPRUNTS -->
+  <div id="tableDiv" style="display:none;">
+    <h2>Livres empruntés</h2>
+    <table border="1" id="borrowTable">
+      <thead>
+        <tr>
+          <th>Nom du livre</th>
+          <th>Nom de l'élève</th>
+          <th>Date d'emprunt</th>
+          <th>Classe</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+    <button onclick="logout()">Se déconnecter</button>
+  </div>
 
-    <!-- APP -->
-    <section id="appSection" class="hidden">
-
-      <div class="card row space">
-        <div>
-          <h2 id="welcome">Bienvenue</h2>
-          <p id="connectedInfo" class="muted"></p>
-        </div>
-        <div class="small">
-          <button id="btnLogout" class="danger">Se déconnecter</button>
-        </div>
-      </div>
-
-      <!-- CONTROLS -->
-      <section class="card grid-2">
-        <div>
-          <h3>Ajouter un livre</h3>
-          <div class="form-grid">
-            <input id="titre" placeholder="Titre" />
-            <input id="auteur" placeholder="Auteur" />
-            <select id="langue">
-              <option>Français</option>
-              <option>Anglais</option>
-              <option>Lao</option>
-            </select>
-            <select id="classeAdd">
-              <option>Cycle 1</option>
-              <option>Cycle 2</option>
-              <option>Cycle 3</option>
-              <option>Cycle 4</option>
-            </select>
-          </div>
-          <div class="row">
-            <button id="btnAdd" class="primary">Ajouter</button>
-            <button id="btnClearForm" class="outline">Effacer</button>
-          </div>
-        </div>
-
-        <div>
-          <h3>Outils</h3>
-          <div class="form-grid">
-            <input id="search" placeholder="Rechercher titre ou auteur..." />
-            <input id="qrUrl" placeholder="URL (pour QR - ex: GitHub Pages)" />
-          </div>
-          <div class="row">
-            <button id="btnStats" class="outline">Statistiques</button>
-            <button id="btnQR" class="outline">Générer QR</button>
-          </div>
-          <div class="row" style="margin-top:8px;">
-            <button id="btnExport" class="outline">Exporter JSON</button>
-            <label class="btn-file outline">Importer JSON <input id="fileImport" type="file" accept=".json" /></label>
-          </div>
-          <div id="qrcode" class="qrcode"></div>
-        </div>
-      </section>
-
-      <!-- BOOKS -->
-      <section class="card">
-        <h3>Liste des livres</h3>
-        <div id="statsBox" class="muted small hidden"></div>
-        <ul id="booksList" class="books"></ul>
-      </section>
-
-    </section>
-
-  </main>
-
-  <footer class="footer">
-    <small>Stockage local (LocalStorage) · Export/Import JSON pour partager</small>
-  </footer>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
+
