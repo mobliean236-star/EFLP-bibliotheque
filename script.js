@@ -1,14 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  /* -------------------- Comptes enseignants -------------------- */
   const ACCOUNTS = {
-    "alex": { pass: "alex123", nom: "Alex", classe: "Cycle 4" },
-    "dominique": { pass: "dom123", nom: "Dominique", classe: "Cycle 2" },
-    "camille": { pass: "cam123", nom: "Camille", classe: "Cycle 3" }
-    // Ajoute les autres comptes si nécessaire
+    "alex": { pass: "alex123", nom: "Alex" },
+    "dominique": { pass: "dom123", nom: "Dominique" },
+    "camille": { pass: "cam123", nom: "Camille" }
   };
 
-  /* -------------------- Stockage local -------------------- */
+  // Stockage local
   if (!localStorage.getItem("books")) localStorage.setItem("books", "[]");
   if (!localStorage.getItem("loans")) localStorage.setItem("loans", "[]");
 
@@ -20,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("loans", JSON.stringify(loans));
   }
 
-  /* -------------------- Login -------------------- */
+  /* -------------------- LOGIN -------------------- */
   const loginSection = document.getElementById("loginSection");
   const appSection = document.getElementById("appSection");
   const loginId = document.getElementById("loginId");
@@ -29,7 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginError = document.getElementById("loginError");
 
   const welcome = document.getElementById("welcome");
-  const connectedInfo = document.getElementById("connectedInfo");
   const btnLogout = document.getElementById("btnLogout");
 
   function currentUser() {
@@ -47,13 +44,11 @@ document.addEventListener("DOMContentLoaded", () => {
   btnLogin.addEventListener("click", () => {
     const id = loginId.value.trim().toLowerCase();
     const pw = loginPass.value.trim();
-
     if (!ACCOUNTS[id] || ACCOUNTS[id].pass !== pw) {
       loginError.textContent = "Identifiant ou mot de passe incorrect.";
       return;
     }
-
-    setUser({ id, nom: ACCOUNTS[id].nom, classe: ACCOUNTS[id].classe });
+    setUser({ id, nom: ACCOUNTS[id].nom });
     showApp();
   });
 
@@ -63,10 +58,10 @@ document.addEventListener("DOMContentLoaded", () => {
     loginSection.classList.add("hidden");
     appSection.classList.remove("hidden");
     welcome.textContent = "Bienvenue " + u.nom;
-    connectedInfo.textContent = "Connecté — " + u.classe;
     afficherLivres();
     afficherEmprunts();
   }
+
   if (currentUser()) showApp();
 
   /* -------------------- Ajouter un livre -------------------- */
@@ -79,41 +74,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const titre = titreEl.value.trim();
     const auteur = auteurEl.value.trim();
     const langue = langueEl.value;
-
     if (!titre || !auteur) { alert("Remplis titre et auteur."); return; }
 
-    const u = currentUser();
     books.unshift({
       id: crypto.randomUUID(),
       titre,
       auteur,
-      langue,
-      addedBy: u.id,
-      addedClass: u.classe
+      langue
     });
-
     save();
     titreEl.value = "";
     auteurEl.value = "";
     afficherLivres();
   });
 
-  /* -------------------- Afficher les livres -------------------- */
+  /* -------------------- Afficher livres -------------------- */
   const booksList = document.getElementById("booksList");
   const searchEl = document.getElementById("search");
-
   searchEl.addEventListener("input", afficherLivres);
 
   function afficherLivres() {
     const q = searchEl.value.trim().toLowerCase();
     booksList.innerHTML = "";
-
     const filtered = books.filter(b =>
-      b.titre.toLowerCase().includes(q) ||
-      b.auteur.toLowerCase().includes(q)
+      b.titre.toLowerCase().includes(q) || b.auteur.toLowerCase().includes(q)
     );
-
-    if (filtered.length === 0) {
+    if (!filtered.length) {
       booksList.innerHTML = "<p class='muted'>Aucun livre trouvé.</p>";
       return;
     }
@@ -123,104 +109,98 @@ document.addEventListener("DOMContentLoaded", () => {
       li.className = "book-item lang-" + b.langue.replace(/\s/g, "");
 
       const emprunt = loans.find(l => l.bookId === b.id);
-
       li.innerHTML = `
         <div class="book-left">
           <strong>${b.titre}</strong>
           <span class="meta">${b.auteur}</span>
           <span class="meta">Langue : ${b.langue}</span>
-          ${emprunt ? `<span class="badge">Emprunté : ${emprunt.eleve} (${emprunt.classe})</span>` :
+          ${emprunt ? `<span class="badge">Emprunté : ${emprunt.eleve}</span>` :
             `<span class="badge">Disponible</span>`}
         </div>
         <div class="actions">
-          <button class="action-btn" onclick="borrowBook('${b.id}')">
+          <button class="action-btn" onclick="toggleLoan('${b.id}')">
             ${emprunt ? "Retourner" : "Emprunter"}
           </button>
           <button class="action-btn danger" onclick="deleteBook('${b.id}')">Supprimer</button>
         </div>
       `;
-
       booksList.appendChild(li);
     });
   }
 
-  /* -------------------- Emprunter / Retourner -------------------- */
+  window.deleteBook = function(id) {
+    if (!confirm("Supprimer ce livre ?")) return;
+    books = books.filter(b => b.id !== id);
+    loans = loans.filter(l => l.bookId !== id);
+    save();
+    afficherLivres();
+    afficherEmprunts();
+  };
+
+  /* -------------------- Emprunts -------------------- */
   const loansTable = document.getElementById("loansTable");
 
-  window.borrowBook = function(bookId) {
+  window.toggleLoan = function(bookId) {
     const emprunt = loans.find(l => l.bookId === bookId);
+
     if (emprunt) {
-      if (confirm("Retourner ce livre ?")) {
-        loans = loans.filter(l => l.bookId !== bookId);
-        save();
-        afficherLivres();
-        afficherEmprunts();
-      }
+      if (!confirm("Retourner ce livre ?")) return;
+      loans = loans.filter(l => l.bookId !== bookId);
+      save();
+      afficherLivres();
+      afficherEmprunts();
       return;
     }
 
-    const classe = prompt("Classe de l’élève ?");
-    const nom = prompt("Nom de l’élève ?");
-    if (!classe || !nom) return;
+    const eleve = prompt("Nom de l'élève :");
+    if (!eleve) return;
 
-    loans.unshift({
+    loans.push({
       id: crypto.randomUUID(),
       bookId,
-      eleve: nom.trim(),
-      classe: classe.trim(),
+      eleve: eleve.trim(),
       date: new Date().toISOString()
     });
-
     save();
     afficherLivres();
     afficherEmprunts();
   };
 
-  window.deleteBook = function(bookId) {
-    if (!confirm("Supprimer ce livre ?")) return;
-    books = books.filter(b => b.id !== bookId);
-    loans = loans.filter(l => l.bookId !== bookId);
-    save();
-    afficherLivres();
-    afficherEmprunts();
-  };
-
-  /* -------------------- Afficher les emprunts -------------------- */
   function afficherEmprunts() {
-    if (!loansTable) return;
     loansTable.innerHTML = "";
-    if (loans.length === 0) {
+    if (!loans.length) {
       loansTable.innerHTML = "<p class='muted'>Aucun emprunt.</p>";
       return;
     }
+
     loans.forEach(l => {
       const book = books.find(b => b.id === l.bookId);
       const div = document.createElement("div");
       div.className = "loan-item";
       div.innerHTML = `
         <strong>${book?.titre || "Livre supprimé"}</strong>
-        <br> Élève : ${l.eleve} (${l.classe})
-        <br> Date : ${new Date(l.date).toLocaleDateString()}
+        <br>Élève : ${l.eleve}
+        <br>Date : ${new Date(l.date).toLocaleDateString()}
       `;
       loansTable.appendChild(div);
     });
   }
 
-  /* -------------------- Export JSON -------------------- */
+  /* -------------------- Import / Export -------------------- */
   const btnExport = document.getElementById("btnExport");
+  const fileImport = document.getElementById("fileImport");
+
   btnExport.addEventListener("click", () => {
     const data = { books, loans };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "bibliotheque_eflp.json";
+    a.download = "bibliotheque.json";
     a.click();
     URL.revokeObjectURL(url);
   });
 
-  /* -------------------- Import JSON -------------------- */
-  const fileImport = document.getElementById("fileImport");
   fileImport.addEventListener("change", e => {
     const f = e.target.files[0];
     if (!f) return;
@@ -228,8 +208,9 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.onload = ev => {
       try {
         const parsed = JSON.parse(ev.target.result);
-        books = parsed.books || parsed;   // si JSON n’a pas de loans
-        loans = parsed.loans || [];
+        if (!parsed.books || !parsed.loans) throw new Error("Format invalide");
+        books = parsed.books.map(b => ({ ...b, id: b.id || crypto.randomUUID() }));
+        loans = parsed.loans.map(l => ({ ...l, id: l.id || crypto.randomUUID() }));
         save();
         afficherLivres();
         afficherEmprunts();
@@ -242,3 +223,4 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+
