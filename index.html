@@ -18,7 +18,7 @@
     <p id="loginError" style="color:red;"></p>
   </div>
 
-  <!-- TABLEAU DES EMPRUNTS -->
+  <!-- TABLEAU DES EMPRUNTS ET FORMULAIRE AJOUT -->
   <div id="tableDiv" style="display:none;">
     <h2>Livres empruntés</h2>
     <table border="1" id="borrowTable">
@@ -33,6 +33,16 @@
       <tbody>
       </tbody>
     </table>
+
+    <h3>Ajouter un nouvel emprunt</h3>
+    <input type="text" id="newLivre" placeholder="Nom du livre">
+    <input type="text" id="newEleve" placeholder="Nom de l'élève">
+    <input type="text" id="newDate" placeholder="Date d'emprunt (jj/mm/aaaa)">
+    <input type="text" id="newClasse" placeholder="Classe">
+    <button onclick="addBorrow()">Ajouter</button>
+    <p id="addError" style="color:red;"></p>
+
+    <br><br>
     <button onclick="logout()">Se déconnecter</button>
   </div>
 
@@ -42,4 +52,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-
