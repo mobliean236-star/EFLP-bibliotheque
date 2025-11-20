@@ -51,3 +51,4 @@ if (document.getElementById('tableau-emprunts')) {
       .catch(err => console.error(err));
   }
 }
+
