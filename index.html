@@ -3,19 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Connexion Professeurs - Bibliothèque EFLP</title>
+  <title>Connexion Professeurs - Bibliothèque</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+
   <h1>Connexion Professeurs</h1>
-  <div class="login-container">
-    <form id="loginForm">
-      <input type="text" id="username" placeholder="Identifiant" required>
-      <input type="password" id="password" placeholder="Mot de passe" required>
-      <button type="submit">Se connecter</button>
-      <div id="errorMsg" style="color:red; margin-top:10px;"></div>
-    </form>
-  </div>
+
+  <form id="loginForm" class="login-container">
+
+    <input type="text" id="username" placeholder="Identifiant" required>
+    <input type="password" id="password" placeholder="Mot de passe" required>
+
+    <button type="submit">Se connecter</button>
+
+    <!-- MESSAGE D’ERREUR (obligatoire !) -->
+    <p id="errorMsg" style="color:red; text-align:center; margin-top:10px;"></p>
+
+  </form>
+
   <script src="script.js"></script>
 </body>
 </html>
+
