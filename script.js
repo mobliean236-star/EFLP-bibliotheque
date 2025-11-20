@@ -1,11 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+  /* -------------------- Comptes enseignants -------------------- */
   const ACCOUNTS = {
     "alex": { pass: "alex123", nom: "Alex", classe: "Cycle 4" },
     "dominique": { pass: "dom123", nom: "Dominique", classe: "Cycle 2" },
     "camille": { pass: "cam123", nom: "Camille", classe: "Cycle 3" }
+    // Ajoute les autres comptes si nécessaire
   };
 
+  /* -------------------- Stockage local -------------------- */
   if (!localStorage.getItem("books")) localStorage.setItem("books", "[]");
   if (!localStorage.getItem("loans")) localStorage.setItem("loans", "[]");
 
@@ -17,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("loans", JSON.stringify(loans));
   }
 
+  /* -------------------- Login -------------------- */
   const loginSection = document.getElementById("loginSection");
   const appSection = document.getElementById("appSection");
   const loginId = document.getElementById("loginId");
@@ -31,25 +35,24 @@ document.addEventListener("DOMContentLoaded", () => {
   function currentUser() {
     return JSON.parse(localStorage.getItem("eflp_user") || "null");
   }
-
   function setUser(u) {
     localStorage.setItem("eflp_user", JSON.stringify(u));
   }
-
   function logout() {
     localStorage.removeItem("eflp_user");
     location.reload();
   }
-
   btnLogout.addEventListener("click", logout);
 
   btnLogin.addEventListener("click", () => {
     const id = loginId.value.trim().toLowerCase();
     const pw = loginPass.value.trim();
+
     if (!ACCOUNTS[id] || ACCOUNTS[id].pass !== pw) {
       loginError.textContent = "Identifiant ou mot de passe incorrect.";
       return;
     }
+
     setUser({ id, nom: ACCOUNTS[id].nom, classe: ACCOUNTS[id].classe });
     showApp();
   });
@@ -57,20 +60,16 @@ document.addEventListener("DOMContentLoaded", () => {
   function showApp() {
     const u = currentUser();
     if (!u) return;
-
     loginSection.classList.add("hidden");
     appSection.classList.remove("hidden");
-
     welcome.textContent = "Bienvenue " + u.nom;
     connectedInfo.textContent = "Connecté — " + u.classe;
-
     afficherLivres();
     afficherEmprunts();
   }
-
   if (currentUser()) showApp();
 
-  // Ajouter livre
+  /* -------------------- Ajouter un livre -------------------- */
   const titreEl = document.getElementById("titre");
   const auteurEl = document.getElementById("auteur");
   const langueEl = document.getElementById("langue");
@@ -80,15 +79,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const titre = titreEl.value.trim();
     const auteur = auteurEl.value.trim();
     const langue = langueEl.value;
-    if (!titre || !auteur) return alert("Remplis titre et auteur.");
+
+    if (!titre || !auteur) { alert("Remplis titre et auteur."); return; }
+
     const u = currentUser();
-    books.unshift({ id: crypto.randomUUID(), titre, auteur, langue, addedBy: u.id, addedClass: u.classe });
+    books.unshift({
+      id: crypto.randomUUID(),
+      titre,
+      auteur,
+      langue,
+      addedBy: u.id,
+      addedClass: u.classe
+    });
+
     save();
-    titreEl.value = ""; auteurEl.value = "";
+    titreEl.value = "";
+    auteurEl.value = "";
     afficherLivres();
   });
 
-  // Afficher livres
+  /* -------------------- Afficher les livres -------------------- */
   const booksList = document.getElementById("booksList");
   const searchEl = document.getElementById("search");
 
@@ -98,30 +108,43 @@ document.addEventListener("DOMContentLoaded", () => {
     const q = searchEl.value.trim().toLowerCase();
     booksList.innerHTML = "";
 
-    const filtered = books.filter(b => b.titre.toLowerCase().includes(q) || b.auteur.toLowerCase().includes(q));
+    const filtered = books.filter(b =>
+      b.titre.toLowerCase().includes(q) ||
+      b.auteur.toLowerCase().includes(q)
+    );
 
-    if (filtered.length === 0) { booksList.innerHTML = "<p class='muted'>Aucun livre trouvé.</p>"; return; }
+    if (filtered.length === 0) {
+      booksList.innerHTML = "<p class='muted'>Aucun livre trouvé.</p>";
+      return;
+    }
 
     filtered.forEach(b => {
       const li = document.createElement("li");
       li.className = "book-item lang-" + b.langue.replace(/\s/g, "");
+
       const emprunt = loans.find(l => l.bookId === b.id);
+
       li.innerHTML = `
         <div class="book-left">
           <strong>${b.titre}</strong>
           <span class="meta">${b.auteur}</span>
           <span class="meta">Langue : ${b.langue}</span>
-          ${emprunt ? `<span class="badge">Emprunté : ${emprunt.eleve} (${emprunt.classe})</span>` : `<span class="badge">Disponible</span>`}
+          ${emprunt ? `<span class="badge">Emprunté : ${emprunt.eleve} (${emprunt.classe})</span>` :
+            `<span class="badge">Disponible</span>`}
         </div>
         <div class="actions">
-          <button class="action-btn" onclick="borrowBook('${b.id}')">${emprunt ? "Retourner" : "Emprunter"}</button>
+          <button class="action-btn" onclick="borrowBook('${b.id}')">
+            ${emprunt ? "Retourner" : "Emprunter"}
+          </button>
           <button class="action-btn danger" onclick="deleteBook('${b.id}')">Supprimer</button>
-        </div>`;
+        </div>
+      `;
+
       booksList.appendChild(li);
     });
   }
 
-  // Emprunt / Retour
+  /* -------------------- Emprunter / Retourner -------------------- */
   const loansTable = document.getElementById("loansTable");
 
   window.borrowBook = function(bookId) {
@@ -135,10 +158,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       return;
     }
+
     const classe = prompt("Classe de l’élève ?");
     const nom = prompt("Nom de l’élève ?");
     if (!classe || !nom) return;
-    loans.unshift({ id: crypto.randomUUID(), bookId, eleve: nom.trim(), classe: classe.trim(), date: new Date().toISOString() });
+
+    loans.unshift({
+      id: crypto.randomUUID(),
+      bookId,
+      eleve: nom.trim(),
+      classe: classe.trim(),
+      date: new Date().toISOString()
+    });
+
     save();
     afficherLivres();
     afficherEmprunts();
@@ -153,47 +185,60 @@ document.addEventListener("DOMContentLoaded", () => {
     afficherEmprunts();
   };
 
+  /* -------------------- Afficher les emprunts -------------------- */
   function afficherEmprunts() {
+    if (!loansTable) return;
     loansTable.innerHTML = "";
-    if (loans.length === 0) { loansTable.innerHTML = "<p class='muted'>Aucun emprunt.</p>"; return; }
+    if (loans.length === 0) {
+      loansTable.innerHTML = "<p class='muted'>Aucun emprunt.</p>";
+      return;
+    }
     loans.forEach(l => {
       const book = books.find(b => b.id === l.bookId);
       const div = document.createElement("div");
       div.className = "loan-item";
-      div.innerHTML = `<strong>${book?.titre || "Livre supprimé"}</strong><br>Élève : ${l.eleve} (${l.classe})<br>Date : ${new Date(l.date).toLocaleDateString()}`;
+      div.innerHTML = `
+        <strong>${book?.titre || "Livre supprimé"}</strong>
+        <br> Élève : ${l.eleve} (${l.classe})
+        <br> Date : ${new Date(l.date).toLocaleDateString()}
+      `;
       loansTable.appendChild(div);
     });
   }
 
-  // Export JSON
-  document.getElementById("btnExport").addEventListener("click", () => {
+  /* -------------------- Export JSON -------------------- */
+  const btnExport = document.getElementById("btnExport");
+  btnExport.addEventListener("click", () => {
     const data = { books, loans };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
+    a.href = url;
     a.download = "bibliotheque_eflp.json";
     a.click();
+    URL.revokeObjectURL(url);
   });
 
-  // Import JSON
-  document.getElementById("fileImport").addEventListener("change", e => {
+  /* -------------------- Import JSON -------------------- */
+  const fileImport = document.getElementById("fileImport");
+  fileImport.addEventListener("change", e => {
     const f = e.target.files[0];
-    if (!f) return alert("Aucun fichier sélectionné !");
+    if (!f) return;
     const reader = new FileReader();
     reader.onload = ev => {
       try {
         const parsed = JSON.parse(ev.target.result);
-        if (!parsed.books || !parsed.loans) throw new Error("JSON doit contenir { books:[], loans:[] }");
-        books = parsed.books;
-        loans = parsed.loans;
+        books = parsed.books || parsed;   // si JSON n’a pas de loans
+        loans = parsed.loans || [];
         save();
         afficherLivres();
         afficherEmprunts();
         alert("Import réussi !");
-      } catch(err) { alert("Erreur : " + err.message); }
+      } catch (err) {
+        alert("Erreur : " + err.message);
+      }
     };
     reader.readAsText(f);
   });
 
 });
-
