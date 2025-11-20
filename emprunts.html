@@ -3,39 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bibliothèque EFLP</title>
+  <title>Bibliothèque - Emprunts</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <h1>Bibliothèque EFLP</h1>
+
+  <h1>📚 Liste des Livres & Emprunts</h1>
+
+  <!-- Import du fichier JSON -->
+  <input type="file" id="importJson" accept=".json">
 
   <!-- Barre de recherche -->
-  <div class="search-container">
-    <input type="text" id="searchInput" placeholder="Rechercher un livre par titre, auteur ou langue">
-  </div>
+  <h2>🔍 Rechercher un livre</h2>
+  <input type="text" id="searchInput" placeholder="Rechercher...">
 
-  <!-- Liste de tous les livres -->
-  <h2>Liste de tous les livres</h2>
-  <ul id="liste-livres">
-    <!-- Rempli automatiquement par script.js -->
-  </ul>
+  <!-- Liste complète des livres -->
+  <h2>📘 Tous les livres</h2>
+  <ul id="liste-livres"></ul>
 
   <!-- Tableau des emprunts -->
-  <h2>Livres empruntés</h2>
-  <table id="tableau-emprunts">
-    <thead>
-      <tr>
-        <th>Nom de l'élève</th>
-        <th>Classe</th>
-        <th>Nom du livre + date</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Rempli automatiquement par script.js -->
-    </tbody>
-  </table>
-
-  <script src="script.js"></script>
-</body>
-</html>
-
+  <h2>📕 Livres empruntés</
