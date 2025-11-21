@@ -5,10 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>📚 Bibliothèque EFLP</title>
   <link rel="stylesheet" href="style.css">
-
-  <!-- QRCode -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
-  <!-- XLSX pour import Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
   <script src="script.js" defer></script>
 </head>
@@ -36,7 +33,6 @@
     <!-- APP -->
     <section id="appSection" class="hidden">
 
-      <!-- Welcome + Logout -->
       <div class="card row space">
         <div>
           <h2 id="welcome">Bienvenue</h2>
@@ -46,10 +42,8 @@
         </div>
       </div>
 
-      <!-- Contrôles -->
+      <!-- CONTROLS -->
       <section class="card grid-2">
-
-        <!-- Ajouter livre -->
         <div>
           <h3>Ajouter un livre</h3>
           <div class="form-grid">
@@ -67,7 +61,6 @@
           </div>
         </div>
 
-        <!-- Outils -->
         <div>
           <h3>Outils</h3>
           <div class="form-grid">
@@ -85,16 +78,15 @@
           </div>
           <div id="qrcode" class="qrcode"></div>
         </div>
-
       </section>
 
-      <!-- Liste livres -->
+      <!-- BOOKS -->
       <section class="card">
         <h3>Liste des livres</h3>
         <ul id="booksList" class="books"></ul>
       </section>
 
-      <!-- Livres empruntés -->
+      <!-- LOANS -->
       <section class="card">
         <h3>Livres empruntés</h3>
         <div id="loansTable"></div>
@@ -110,4 +102,5 @@
 
 </body>
 </html>
+
 
