@@ -40,3 +40,4 @@ button:active{transform:translateY(1px)}
 .btn-file input[type=file]{position:absolute;left:0;top:0;opacity:0;width:100%;height:100%;cursor:pointer}
 @media(max-width:860px){.grid-2{grid-template-columns:1fr}.row{flex-direction:column;align-items:stretch}}
 
+
