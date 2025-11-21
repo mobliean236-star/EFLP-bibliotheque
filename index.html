@@ -5,9 +5,17 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>📚 Bibliothèque EFLP</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- XLSX pour importer Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- QR Code -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+
+  <!-- Script principal -->
   <script src="script.js" defer></script>
 </head>
+
 <body>
 
   <header class="topbar">
@@ -16,6 +24,7 @@
 
   <main class="container">
 
+    <!-- CONNEXION PROF -->
     <section id="loginSection" class="card">
       <h2>Connexion Enseignant</h2>
       <div class="form-row">
@@ -28,71 +37,51 @@
       <p id="loginError" class="error"></p>
     </section>
 
+    <!-- APPLICATION -->
     <section id="appSection" class="hidden">
 
       <div class="card row space">
-        <div>
-          <h2 id="welcome">Bienvenue</h2>
-        </div>
-        <div class="small">
-          <button id="btnLogout" class="danger">Se déconnecter</button>
-        </div>
+        <h2 id="welcome">Bienvenue</h2>
+        <button id="btnLogout" class="danger">Se déconnecter</button>
       </div>
 
+      <!-- AJOUT / OUTILS -->
       <section class="card grid-2">
+
         <div>
           <h3>Ajouter un livre</h3>
           <div class="form-grid">
             <input id="titre" placeholder="Titre" />
             <input id="auteur" placeholder="Auteur" />
-            <select id="langue">
-              <option>Français</option>
-              <option>Anglais</option>
-              <option>Lao</option>
+            <select id="genre">
+              <option>Roman</option>
+              <option>Documentaire</option>
+              <option>Album</option>
+              <option>Abécédaire</option>
+              <option>BD</option>
             </select>
           </div>
-          <div class="row">
-            <button id="btnAdd" class="primary">Ajouter</button>
-            <button id="btnClearForm" class="outline">Effacer</button>
-          </div>
+          <button id="btnAdd" class="primary">Ajouter</button>
+          <button id="btnClearForm" class="outline">Effacer</button>
         </div>
 
         <div>
           <h3>Outils</h3>
-          <div class="form-grid">
-            <input id="search" placeholder="Rechercher titre ou auteur..." />
-            <input id="qrUrl" placeholder="URL pour QR code" />
-          </div>
-          <div class="row">
-            <button id="btnQR" class="outline">Générer QR</button>
-          </div>
-          <div class="row" style="margin-top:8px;">
-            <button id="btnExport" class="outline">Exporter JSON</button>
-            <label class="btn-file outline">
-              Importer JSON <input id="fileImport" type="file" accept=".json" />
-            </label>
-          </div>
+          <input id="search" placeholder="Rechercher titre ou auteur..." />
+
+          <label class="btn-file outline">
+            Importer Excel <input id="fileExcel" type="file" accept=".xlsx" />
+          </label>
+
+          <button id="btnExport" class="outline">Exporter JSON</button>
+
+          <input id="qrUrl" placeholder="URL pour QR code" />
+          <button id="btnQR" class="outline">Générer QR</button>
+
           <div id="qrcode" class="qrcode"></div>
         </div>
+
       </section>
 
+      <!-- LISTE LIVRES -->
       <section class="card">
-        <h3>Liste des livres</h3>
-        <ul id="booksList" class="books"></ul>
-      </section>
-
-      <section class="card">
-        <h3>Livres empruntés</h3>
-        <div id="loansTable"></div>
-      </section>
-
-    </section>
-
-  </main>
-
-  <footer class="footer">
-    <small>Stockage local (LocalStorage) · Export/Import JSON</small>
-  </footer>
-
-</bod
-
