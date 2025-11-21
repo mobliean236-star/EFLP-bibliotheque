@@ -1,7 +1,6 @@
 /* ============================================================
    Bibliothèque EFLP — Version complète + Import Excel (.xlsx)
    ============================================================ */
-
 document.addEventListener("DOMContentLoaded", () => {
 
   /* -------------------- Stockage local -------------------- */
@@ -15,7 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("books", JSON.stringify(books));
     localStorage.setItem("loans", JSON.stringify(loans));
   }
-
 
   /* -------------------- Ajouter un livre -------------------- */
   const titreEl = document.getElementById("titre");
@@ -45,7 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
     auteurEl.value = "";
     afficherLivres();
   });
-
 
   /* -------------------- Afficher les livres -------------------- */
   const booksList = document.getElementById("booksList");
@@ -94,7 +91,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-
   /* -------------------- Emprunter / Retourner -------------------- */
   window.borrowBook = function(bookId) {
     const emprunt = loans.find(l => l.bookId === bookId);
@@ -129,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
     afficherEmprunts();
   };
 
-
+  /* -------------------- Supprimer -------------------- */
   window.deleteBook = function(bookId) {
     if (!confirm("Supprimer ce livre ?")) return;
     books = books.filter(b => b.id !== bookId);
@@ -138,7 +134,6 @@ document.addEventListener("DOMContentLoaded", () => {
     afficherLivres();
     afficherEmprunts();
   };
-
 
   /* -------------------- Tableau des emprunts -------------------- */
   const loansTable = document.getElementById("loansTable");
@@ -167,8 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-
-  /* -------------------- IMPORT (JSON + EXCEL) -------------------- */
+  /* -------------------- IMPORT JSON / EXCEL -------------------- */
   const fileImport = document.getElementById("fileImport");
 
   fileImport.addEventListener("change", (e) => {
@@ -177,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const reader = new FileReader();
 
-    /* ----- IMPORT JSON ----- */
+    // JSON
     if (file.name.endsWith(".json")) {
       reader.onload = (event) => {
         try {
@@ -196,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    /* ----- IMPORT EXCEL (.xlsx) ----- */
+    // EXCEL
     if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
       reader.onload = (event) => {
         const data = new Uint8Array(event.target.result);
@@ -205,12 +199,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const excelBooks = XLSX.utils.sheet_to_json(sheet);
 
-        books = excelBooks.map(b => ({
-          id: crypto.randomUUID(),
-          titre: b.Titre || "Sans titre",
-          auteur: b.Auteur || "Inconnu",
-          langue: "Français"
-        }));
+        excelBooks.forEach(b => {
+          if (!b.Titre || !b.Auteur) return;
+          books.unshift({
+            id: crypto.randomUUID(),
+            titre: b.Titre,
+            auteur: b.Auteur,
+            langue: b.Genre || "Français"
+          });
+        });
 
         save();
         afficherLivres();
@@ -223,17 +220,13 @@ document.addEventListener("DOMContentLoaded", () => {
     alert("Format non supporté");
   });
 
-
   /* -------------------- EXPORT JSON -------------------- */
   const btnExport = document.getElementById("btnExport");
 
   btnExport.addEventListener("click", () => {
     const data = { books, loans };
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: "application/json"
-    });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement("a");
     a.href = url;
     a.download = "bibliotheque_eflp.json";
@@ -241,8 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
     URL.revokeObjectURL(url);
   });
 
-
-  /* -------------------- Actualisation -------------------- */
+  /* -------------------- Initialisation -------------------- */
   afficherLivres();
   afficherEmprunts();
 
