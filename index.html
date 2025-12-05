@@ -1,177 +1,13 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>📚 Bibliothèque EFLP</title>
-<link rel="stylesheet" href="style.css">
-<script defer>
-document.addEventListener("DOMContentLoaded", () => {
-
-  /* -------------------- Comptes enseignants -------------------- */
-  const ACCOUNTS = {
-    "alex":      { pass: "alex123", nom: "Alex" },
-    "camille":   { pass: "cam123", nom: "Camille" },
-    "elvis":     { pass: "elvis123", nom: "Elvis" },
-    "caroline":  { pass: "caro123", nom: "Caroline" },
-    "carole":    { pass: "caro1", nom: "Carole" },
-    "khamchan":  { pass: "khamchan123", nom: "Khamchan" }
-  };
-
-  /* -------------------- Stockage local -------------------- */
-  if (!localStorage.getItem("books")) localStorage.setItem("books","[]");
-  if (!localStorage.getItem("loans")) localStorage.setItem("loans","[]");
-
-  let books = JSON.parse(localStorage.getItem("books"));
-  let loans = JSON.parse(localStorage.getItem("loans"));
-
-  function save() {
-    localStorage.setItem("books", JSON.stringify(books));
-    localStorage.setItem("loans", JSON.stringify(loans));
-  }
-
-  /* -------------------- Login -------------------- */
-  const loginSection = document.getElementById("loginSection");
-  const appSection = document.getElementById("appSection");
-  const loginId = document.getElementById("loginId");
-  const loginPass = document.getElementById("loginPass");
-  const btnLogin = document.getElementById("btnLogin");
-  const loginError = document.getElementById("loginError");
-  const welcome = document.getElementById("welcome");
-  const btnLogout = document.getElementById("btnLogout");
-
-  function currentUser() {
-    return JSON.parse(localStorage.getItem("eflp_user") || "null");
-  }
-  function setUser(u) {
-    localStorage.setItem("eflp_user", JSON.stringify(u));
-  }
-  function logout() {
-    localStorage.removeItem("eflp_user");
-    location.reload();
-  }
-  btnLogout.addEventListener("click", logout);
-
-  btnLogin.addEventListener("click", () => {
-    console.log("Connexion cliquée !");
-    const id = loginId.value.trim().toLowerCase();
-    const pw = loginPass.value.trim();
-    if (!ACCOUNTS[id] || ACCOUNTS[id].pass !== pw) {
-      loginError.textContent = "Identifiant ou mot de passe incorrect.";
-      return;
-    }
-    setUser({ id, nom: ACCOUNTS[id].nom });
-    showApp();
-  });
-
-  function showApp() {
-    const u = currentUser();
-    if (!u) return;
-    loginSection.classList.add("hidden");
-    appSection.classList.remove("hidden");
-    welcome.textContent = "Bienvenue " + u.nom;
-    afficherLivres();
-    afficherEmprunts();
-  }
-
-  if(currentUser()) showApp();
-
-  /* -------------------- Ajouter un livre -------------------- */
-  const titreEl = document.getElementById("titre");
-  const auteurEl = document.getElementById("auteur");
-  const langueEl = document.getElementById("langue");
-  const btnAdd = document.getElementById("btnAdd");
-
-  btnAdd.addEventListener("click", () => {
-    const titre = titreEl.value.trim();
-    const auteur = auteurEl.value.trim();
-    const langue = langueEl.value;
-    if (!titre || !auteur) { alert("Remplis titre et auteur."); return; }
-    // Ajouter si n'existe pas
-    if(!books.find(b=>b.titre===titre && b.auteur===auteur)){
-      books.unshift({id:crypto.randomUUID(), titre, auteur, langue});
-      save();
-      afficherLivres();
-      titreEl.value = ""; auteurEl.value = "";
-    } else {
-      alert("Livre déjà présent !");
-    }
-  });
-
-  /* -------------------- Afficher livres -------------------- */
-  const booksList = document.getElementById("booksList");
-  const searchEl = document.getElementById("search");
-  searchEl.addEventListener("input", afficherLivres);
-
-  function afficherLivres() {
-    const q = searchEl.value.trim().toLowerCase();
-    booksList.innerHTML = "";
-    const filtered = books.filter(b=>b.titre.toLowerCase().includes(q) || b.auteur.toLowerCase().includes(q));
-    if(filtered.length===0){
-      booksList.innerHTML="<p class='muted'>Aucun livre trouvé.</p>"; return;
-    }
-    filtered.forEach(b=>{
-      const emprunt = loans.find(l=>l.bookId===b.id);
-      const li = document.createElement("li");
-      li.className="book-item lang-"+b.langue.replace(/\s/g,"");
-      li.innerHTML=`
-        <div class="book-left">
-          <strong>${b.titre}</strong>
-          <span class="meta">${b.auteur}</span>
-          <span class="meta">${b.langue}</span>
-          ${emprunt ? `<span class="badge">Emprunté par ${emprunt.user}</span>`:`<span class="badge">Disponible</span>`}
-        </div>
-        <div class="actions">
-          <button class="action-btn" onclick="borrowOrReturn('${b.id}')">
-            ${emprunt && emprunt.user===currentUser().id?"Retourner":"Emprunter"}
-          </button>
-        </div>`;
-      booksList.appendChild(li);
-    });
-  }
-
-  /* -------------------- Emprunter / Retourner -------------------- */
-  window.borrowOrReturn = function(bookId){
-    const u = currentUser();
-    if(!u) return;
-    const emprunt = loans.find(l=>l.bookId===bookId && l.user===u.id);
-    if(emprunt){
-      // Rendre
-      if(confirm("Rendre ce livre ?")){
-        loans = loans.filter(l=>!(l.bookId===bookId && l.user===u.id));
-        save(); afficherLivres(); afficherEmprunts();
-      }
-      return;
-    }
-    // Emprunter
-    loans.unshift({id:crypto.randomUUID(), bookId, user:u.id, date:new Date().toISOString()});
-    save(); afficherLivres(); afficherEmprunts();
-  }
-
-  /* -------------------- Afficher emprunts -------------------- */
-  const loansTable = document.getElementById("loansTable");
-  function afficherEmprunts(){
-    const u = currentUser();
-    loansTable.innerHTML="";
-    const mesEmprunts = loans.filter(l=>l.user===u?.id);
-    if(mesEmprunts.length===0){
-      loansTable.innerHTML="<p class='muted'>Aucun emprunt.</p>"; return;
-    }
-    mesEmprunts.forEach(l=>{
-      const book = books.find(b=>b.id===l.bookId);
-      const div=document.createElement("div");
-      div.className="loan-item";
-      div.innerHTML=`<strong>${book?.titre || "Livre supprimé"}</strong><br>Date : ${new Date(l.date).toLocaleDateString()}`;
-      loansTable.appendChild(div);
-    });
-  }
-
-  /* -------------------- Initialisation -------------------- */
-  afficherLivres();
-  afficherEmprunts();
-
-});
-</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>📚 Bibliothèque EFLP</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
 
@@ -196,39 +32,64 @@ document.addEventListener("DOMContentLoaded", () => {
 
   <!-- APP -->
   <section id="appSection" class="hidden">
+
     <div class="card row space">
-      <h2 id="welcome">Bienvenue</h2>
-      <button id="btnLogout" class="danger">Se déconnecter</button>
+      <div>
+        <h2 id="welcome">Bienvenue</h2>
+      </div>
+      <div class="small">
+        <button id="btnLogout" class="danger">Se déconnecter</button>
+      </div>
     </div>
 
-    <!-- Ajouter un livre -->
-    <section class="card">
-      <h3>Ajouter un livre</h3>
-      <div class="form-grid">
-        <input id="titre" placeholder="Titre" />
-        <input id="auteur" placeholder="Auteur" />
-        <select id="langue">
-          <option>Français</option>
-          <option>Anglais</option>
-          <option>Lao</option>
-        </select>
+    <!-- CONTROLS -->
+    <section class="card grid-2">
+      <div>
+        <h3>Ajouter un livre</h3>
+        <div class="form-grid">
+          <input id="titre" placeholder="Titre" />
+          <input id="auteur" placeholder="Auteur" />
+          <select id="langue">
+            <option>Français</option>
+            <option>Anglais</option>
+            <option>Lao</option>
+          </select>
+        </div>
+        <div class="row">
+          <button id="btnAdd" class="primary">Ajouter</button>
+          <button id="btnClearForm" class="outline">Effacer</button>
+        </div>
       </div>
-      <div class="row">
-        <button id="btnAdd" class="primary">Ajouter</button>
+
+      <div>
+        <h3>Outils</h3>
+        <div class="form-grid">
+          <input id="search" placeholder="Rechercher titre ou auteur..." />
+          <input id="qrUrl" placeholder="URL pour QR code" />
+        </div>
+        <div class="row">
+          <button id="btnQR" class="outline">Générer QR</button>
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <button id="btnExport" class="outline">Exporter JSON</button>
+          <label class="btn-file outline">
+            Importer JSON / Excel <input id="fileImport" type="file" accept=".json,.xlsx,.xls" />
+          </label>
+        </div>
+        <div id="qrcode" class="qrcode"></div>
       </div>
     </section>
 
-    <!-- Liste des livres -->
+    <!-- LIVRES EMPRUNTÉS -->
+    <section class="card">
+      <h3>Livres empruntés</h3>
+      <div id="loansTable"></div>
+    </section>
+
+    <!-- LISTE DES LIVRES -->
     <section class="card">
       <h3>Liste des livres</h3>
-      <input id="search" placeholder="Rechercher titre ou auteur..." />
       <ul id="booksList" class="books"></ul>
-    </section>
-
-    <!-- Livres empruntés -->
-    <section class="card">
-      <h3>Mes emprunts</h3>
-      <div id="loansTable"></div>
     </section>
 
   </section>
@@ -236,8 +97,223 @@ document.addEventListener("DOMContentLoaded", () => {
 </main>
 
 <footer class="footer">
-  <small>Stockage local · Emprunter / Rendre / Ajouter</small>
+  <small>Stockage local (LocalStorage) · Export/Import JSON / Excel</small>
 </footer>
+
+<!-- POP-UP EMPRUNT -->
+<div id="borrowPopup" class="hidden">
+  <div class="popupContent">
+    <h3>Emprunter un livre</h3>
+    <label>Nom de l'élève :</label>
+    <input type="text" id="popupEleve" placeholder="Ex: Jules">
+    <label>Classe :</label>
+    <input type="text" id="popupClasse" placeholder="Ex: Cycle 3">
+    <div class="popupBtns">
+      <button id="popupConfirm">Confirmer</button>
+      <button id="popupCancel">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  /* -------------------- Comptes enseignants -------------------- */
+  const ACCOUNTS = {
+    "alex":      { pass:"alex123", nom:"Alex", classe:"Cycle 4" },
+    "dominique": { pass:"dom123", nom:"Dominique", classe:"Cycle 2" },
+    "camille":   { pass:"cam123", nom:"Camille", classe:"Cycle 3" },
+    "caroline":  { pass:"caro123", nom:"Caroline", classe:"Cycle 2" },
+    "carole":    { pass:"caro1", nom:"Carole", classe:"Cycle 1" },
+    "elvis":     { pass:"elvis123", nom:"Elvis", classe:"Cycle 3" },
+    "khamoun":   { pass:"khamoun123", nom:"Khamoun", classe:"Cycle 4" },
+    "loun":      { pass:"loun123", nom:"Loun", classe:"Cycle 2" },
+    "joy":       { pass:"joy123", nom:"Joy", classe:"Cycle 1" },
+    "khamchan":  { pass:"khamchan123", nom:"Khamchan", classe:"Cycle 3" }
+  };
+
+  /* -------------------- Stockage local -------------------- */
+  if (!localStorage.getItem("books")) localStorage.setItem("books", "[]");
+  if (!localStorage.getItem("loans")) localStorage.setItem("loans", "[]");
+
+  let books = JSON.parse(localStorage.getItem("books"));
+  let loans = JSON.parse(localStorage.getItem("loans"));
+
+  function save() {
+    localStorage.setItem("books", JSON.stringify(books));
+    localStorage.setItem("loans", JSON.stringify(loans));
+  }
+
+  /* -------------------- Login -------------------- */
+  const loginSection = document.getElementById("loginSection");
+  const appSection = document.getElementById("appSection");
+  const loginId = document.getElementById("loginId");
+  const loginPass = document.getElementById("loginPass");
+  const btnLogin = document.getElementById("btnLogin");
+  const loginError = document.getElementById("loginError");
+  const welcome = document.getElementById("welcome");
+  const btnLogout = document.getElementById("btnLogout");
+
+  function currentUser() { return JSON.parse(localStorage.getItem("eflp_user") || "null"); }
+  function setUser(u) { localStorage.setItem("eflp_user", JSON.stringify(u)); }
+  function logout() { localStorage.removeItem("eflp_user"); location.reload(); }
+  btnLogout.addEventListener("click", logout);
+
+  btnLogin.addEventListener("click", () => {
+    const id = loginId.value.trim().toLowerCase();
+    const pw = loginPass.value.trim();
+    if (!ACCOUNTS[id] || ACCOUNTS[id].pass !== pw) {
+      loginError.textContent = "Identifiant ou mot de passe incorrect.";
+      return;
+    }
+    setUser({ id, nom: ACCOUNTS[id].nom, classe: ACCOUNTS[id].classe });
+    showApp();
+  });
+
+  function showApp() {
+    const u = currentUser();
+    if (!u) return;
+    loginSection.classList.add("hidden");
+    appSection.classList.remove("hidden");
+    welcome.textContent = "Bienvenue " + u.nom;
+    afficherLivres();
+    afficherEmprunts();
+  }
+
+  if (currentUser()) showApp();
+
+  /* -------------------- Ajouter un livre -------------------- */
+  const titreEl = document.getElementById("titre");
+  const auteurEl = document.getElementById("auteur");
+  const langueEl = document.getElementById("langue");
+  const btnAdd = document.getElementById("btnAdd");
+
+  btnAdd.addEventListener("click", () => {
+    const titre = titreEl.value.trim();
+    const auteur = auteurEl.value.trim();
+    const langue = langueEl.value;
+    if (!titre || !auteur) { alert("Remplis titre et auteur."); return; }
+    books.unshift({ id: crypto.randomUUID(), titre, auteur, langue });
+    save();
+    titreEl.value = ""; auteurEl.value = "";
+    afficherLivres();
+  });
+
+  /* -------------------- Afficher livres -------------------- */
+  const booksList = document.getElementById("booksList");
+  const searchEl = document.getElementById("search");
+  searchEl.addEventListener("input", afficherLivres);
+
+  function afficherLivres() {
+    const q = searchEl.value.trim().toLowerCase();
+    booksList.innerHTML = "";
+    const filtered = books.filter(b =>
+      b.titre.toLowerCase().includes(q) || b.auteur.toLowerCase().includes(q)
+    );
+    if (filtered.length === 0) { booksList.innerHTML = "<p class='muted'>Aucun livre trouvé.</p>"; return; }
+    filtered.forEach(b => {
+      const emprunt = loans.find(l => l.bookId === b.id);
+      const li = document.createElement("li");
+      li.className = "book-item lang-" + b.langue.replace(/\s/g, "");
+      li.innerHTML = `
+        <div class="book-left">
+          <strong>${b.titre}</strong>
+          <span class="meta">${b.auteur}</span>
+          <span class="meta">${b.langue}</span>
+          ${emprunt ? `<span class="badge">Emprunté : ${emprunt.eleve} (${emprunt.classe})</span>` :
+            `<span class="badge">Disponible</span>`}
+        </div>
+        <div class="actions">
+          <button class="action-btn" onclick="borrowBook('${b.id}')">
+            ${emprunt ? "Retourner" : "Emprunter"}
+          </button>
+          <button class="action-btn danger" onclick="deleteBook('${b.id}')">Supprimer</button>
+        </div>`;
+      booksList.appendChild(li);
+    });
+  }
+
+  /* -------------------- Emprunter / Rendre avec pop-up -------------------- */
+  let currentBookId = null;
+
+  window.borrowBook = function(bookId) {
+    const emprunt = loans.find(l => l.bookId === bookId);
+    if (emprunt) {
+      if (confirm("Retourner ce livre ?")) {
+        loans = loans.filter(l => l.bookId !== bookId);
+        save(); afficherLivres(); afficherEmprunts();
+      }
+      return;
+    }
+    currentBookId = bookId;
+    document.getElementById("popupEleve").value = "";
+    document.getElementById("popupClasse").value = "";
+    document.getElementById("borrowPopup").classList.remove("hidden");
+  };
+
+  document.getElementById("popupCancel").addEventListener("click", () => {
+    document.getElementById("borrowPopup").classList.add("hidden");
+  });
+
+  document.getElementById("popupConfirm").addEventListener("click", () => {
+    const nom = document.getElementById("popupEleve").value.trim();
+    const classe = document.getElementById("popupClasse").value.trim();
+    if (!nom || !classe) { alert("Veuillez remplir le nom et la classe !"); return; }
+    loans.unshift({ id: crypto.randomUUID(), bookId: currentBookId, eleve: nom, classe: classe, date: new Date().toISOString() });
+    save(); afficherLivres(); afficherEmprunts();
+    document.getElementById("borrowPopup").classList.add("hidden");
+    alert(`Livre emprunté par ${nom} (${classe}) !`);
+  });
+
+  window.deleteBook = function(bookId) {
+    if (!confirm("Supprimer ce livre ?")) return;
+    books = books.filter(b => b.id !== bookId);
+    loans = loans.filter(l => l.bookId !== bookId);
+    save(); afficherLivres(); afficherEmprunts();
+  };
+
+  /* -------------------- Tableau des emprunts -------------------- */
+  const loansTable = document.getElementById("loansTable");
+  function afficherEmprunts() {
+    loansTable.innerHTML = "";
+    if (loans.length === 0) { loansTable.innerHTML = "<p class='muted'>Aucun emprunt.</p>"; return; }
+    loans.forEach(l => {
+      const book = books.find(b => b.id === l.bookId);
+      const div = document.createElement("div");
+      div.className = "loan-item";
+      div.innerHTML = `<strong>${book?.titre || "Livre supprimé"}</strong><br> Élève : ${l.eleve} (${l.classe})<br> Date : ${new Date(l.date).toLocaleDateString()}`;
+      loansTable.appendChild(div);
+    });
+  }
+
+  /* -------------------- Import / Export JSON / Excel -------------------- */
+  const fileImport = document.getElementById("fileImport");
+  fileImport.addEventListener("change",(e)=>{
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    if(file.name.endsWith(".json")){
+      reader.onload=(event)=>{ try{ const parsed=JSON.parse(event.target.result); books=parsed.books||parsed; loans=parsed.loans||[]; save(); afficherLivres(); afficherEmprunts(); alert("Import JSON réussi !"); } catch{ alert("Erreur : fichier JSON invalide."); } }; reader.readAsText(file); return;
+    }
+    if(file.name.endsWith(".xlsx")||file.name.endsWith(".xls")){
+      reader.onload=(event)=>{
+        const data=new Uint8Array(event.target.result);
+        const workbook=XLSX.read(data,{type:"array"});
+        const sheet=workbook.Sheets[workbook.SheetNames[0]];
+        const excelBooks=XLSX.utils.sheet_to_json(sheet);
+        books=excelBooks.map(b=>({id:crypto.randomUUID(), titre:b.Titre||"Sans titre", auteur:b.Auteur||"Inconnu", langue:"Français"}));
+        save(); afficherLivres(); alert("Import Excel réussi !");
+      }; reader.readAsArrayBuffer(file); return;
+    }
+    alert("Format non supporté");
+  });
+
+  const btnExport = document.getElementById("btnExport");
+  btnExport.addEventListener("click",()=>{ const data={books,loans}; const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="bibliotheque_eflp.json"; a.click(); URL.revokeObjectURL(url); });
+
+  afficherLivres();
+  afficherEmprunts();
+
+});
+</script>
 
 </body>
 </html>
