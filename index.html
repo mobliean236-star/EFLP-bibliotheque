@@ -1,55 +1,104 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèque EFLP</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>📚 Bibliothèque EFLP</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
 
-    <!-- Haut de page -->
-    <div class="topbar">
-        <h1>📚 Bibliothèque EFLP</h1>
+<header class="topbar">
+  <h1>📚 Bibliothèque EFLP</h1>
+</header>
+
+<main class="container">
+
+  <!-- LOGIN -->
+  <section id="loginSection" class="card">
+    <h2>Connexion Enseignant</h2>
+    <div class="form-row">
+      <input id="loginId" placeholder="Identifiant (ex: alex)" />
+      <input id="loginPass" type="password" placeholder="Mot de passe" />
+    </div>
+    <div class="row">
+      <button id="btnLogin" class="primary">Se connecter</button>
+    </div>
+    <p id="loginError" class="error"></p>
+  </section>
+
+  <!-- APP -->
+  <section id="appSection" class="hidden">
+
+    <div class="card row space">
+      <div>
+        <h2 id="welcome">Bienvenue</h2>
+      </div>
+      <div class="small">
+        <button id="btnLogout" class="danger">Se déconnecter</button>
+      </div>
     </div>
 
-    <div class="container">
-
-        <!-- Carte : Gestion des livres -->
-        <div class="card">
-            <h2>Gestion des livres</h2>
-            <p class="muted">Ici tu peux ajouter, emprunter ou rendre un livre.</p>
-
-            <div class="row" style="margin-top:12px;">
-                <button id="addBookBtn">➕ Ajouter un livre</button>
-                <button id="borrowBookBtn">📖 Emprunter</button>
-                <button id="returnBookBtn">🔄 Rendre</button>
-            </div>
+    <!-- CONTROLS -->
+    <section class="card grid-2">
+      <div>
+        <h3>Ajouter un livre</h3>
+        <div class="form-grid">
+          <input id="titre" placeholder="Titre" />
+          <input id="auteur" placeholder="Auteur" />
+          <select id="langue">
+            <option>Français</option>
+            <option>Anglais</option>
+            <option>Lao</option>
+          </select>
         </div>
-
-
-        <!-- Liste des livres -->
-        <div class="card">
-            <h2>📘 Liste des livres disponibles</h2>
-            <ul id="listeLivres" class="books"></ul>
+        <div class="row">
+          <button id="btnAdd" class="primary">Ajouter</button>
+          <button id="btnClearForm" class="outline">Effacer</button>
         </div>
+      </div>
 
-
-        <!-- Livres empruntés -->
-        <div class="card">
-            <h2>📕 Livres empruntés</h2>
-            <ul id="livresEmpruntes" class="books"></ul>
+      <div>
+        <h3>Outils</h3>
+        <div class="form-grid">
+          <input id="search" placeholder="Rechercher titre ou auteur..." />
+          <input id="qrUrl" placeholder="URL pour QR code" />
         </div>
+        <div class="row">
+          <button id="btnQR" class="outline">Générer QR</button>
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <button id="btnExport" class="outline">Exporter JSON</button>
+          <label class="btn-file outline">
+            Importer JSON / Excel <input id="fileImport" type="file" accept=".json,.xlsx,.xls" />
+          </label>
+        </div>
+        <div id="qrcode" class="qrcode"></div>
+      </div>
+    </section>
 
-    </div>
+    <!-- LIVRES EMPRUNTÉS -->
+    <section class="card">
+      <h3>Livres empruntés</h3>
+      <div id="loansTable"></div>
+    </section>
 
-    <div class="footer">
-        Bibliothèque EFLP — Gestion des livres
-    </div>
+    <!-- LISTE DES LIVRES -->
+    <section class="card">
+      <h3>Liste des livres</h3>
+      <ul id="booksList" class="books"></ul>
+    </section>
 
-    <script src="script.js"></script>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <small>Stockage local (LocalStorage) · Export/Import JSON / Excel</small>
+</footer>
+
 </body>
 </html>
-
-
-
