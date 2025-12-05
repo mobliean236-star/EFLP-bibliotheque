@@ -1,13 +1,177 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>📚 Bibliothèque EFLP</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
-  <script src="script.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>📚 Bibliothèque EFLP</title>
+<link rel="stylesheet" href="style.css">
+<script defer>
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* -------------------- Comptes enseignants -------------------- */
+  const ACCOUNTS = {
+    "alex":      { pass: "alex123", nom: "Alex" },
+    "camille":   { pass: "cam123", nom: "Camille" },
+    "elvis":     { pass: "elvis123", nom: "Elvis" },
+    "caroline":  { pass: "caro123", nom: "Caroline" },
+    "carole":    { pass: "caro1", nom: "Carole" },
+    "khamchan":  { pass: "khamchan123", nom: "Khamchan" }
+  };
+
+  /* -------------------- Stockage local -------------------- */
+  if (!localStorage.getItem("books")) localStorage.setItem("books","[]");
+  if (!localStorage.getItem("loans")) localStorage.setItem("loans","[]");
+
+  let books = JSON.parse(localStorage.getItem("books"));
+  let loans = JSON.parse(localStorage.getItem("loans"));
+
+  function save() {
+    localStorage.setItem("books", JSON.stringify(books));
+    localStorage.setItem("loans", JSON.stringify(loans));
+  }
+
+  /* -------------------- Login -------------------- */
+  const loginSection = document.getElementById("loginSection");
+  const appSection = document.getElementById("appSection");
+  const loginId = document.getElementById("loginId");
+  const loginPass = document.getElementById("loginPass");
+  const btnLogin = document.getElementById("btnLogin");
+  const loginError = document.getElementById("loginError");
+  const welcome = document.getElementById("welcome");
+  const btnLogout = document.getElementById("btnLogout");
+
+  function currentUser() {
+    return JSON.parse(localStorage.getItem("eflp_user") || "null");
+  }
+  function setUser(u) {
+    localStorage.setItem("eflp_user", JSON.stringify(u));
+  }
+  function logout() {
+    localStorage.removeItem("eflp_user");
+    location.reload();
+  }
+  btnLogout.addEventListener("click", logout);
+
+  btnLogin.addEventListener("click", () => {
+    console.log("Connexion cliquée !");
+    const id = loginId.value.trim().toLowerCase();
+    const pw = loginPass.value.trim();
+    if (!ACCOUNTS[id] || ACCOUNTS[id].pass !== pw) {
+      loginError.textContent = "Identifiant ou mot de passe incorrect.";
+      return;
+    }
+    setUser({ id, nom: ACCOUNTS[id].nom });
+    showApp();
+  });
+
+  function showApp() {
+    const u = currentUser();
+    if (!u) return;
+    loginSection.classList.add("hidden");
+    appSection.classList.remove("hidden");
+    welcome.textContent = "Bienvenue " + u.nom;
+    afficherLivres();
+    afficherEmprunts();
+  }
+
+  if(currentUser()) showApp();
+
+  /* -------------------- Ajouter un livre -------------------- */
+  const titreEl = document.getElementById("titre");
+  const auteurEl = document.getElementById("auteur");
+  const langueEl = document.getElementById("langue");
+  const btnAdd = document.getElementById("btnAdd");
+
+  btnAdd.addEventListener("click", () => {
+    const titre = titreEl.value.trim();
+    const auteur = auteurEl.value.trim();
+    const langue = langueEl.value;
+    if (!titre || !auteur) { alert("Remplis titre et auteur."); return; }
+    // Ajouter si n'existe pas
+    if(!books.find(b=>b.titre===titre && b.auteur===auteur)){
+      books.unshift({id:crypto.randomUUID(), titre, auteur, langue});
+      save();
+      afficherLivres();
+      titreEl.value = ""; auteurEl.value = "";
+    } else {
+      alert("Livre déjà présent !");
+    }
+  });
+
+  /* -------------------- Afficher livres -------------------- */
+  const booksList = document.getElementById("booksList");
+  const searchEl = document.getElementById("search");
+  searchEl.addEventListener("input", afficherLivres);
+
+  function afficherLivres() {
+    const q = searchEl.value.trim().toLowerCase();
+    booksList.innerHTML = "";
+    const filtered = books.filter(b=>b.titre.toLowerCase().includes(q) || b.auteur.toLowerCase().includes(q));
+    if(filtered.length===0){
+      booksList.innerHTML="<p class='muted'>Aucun livre trouvé.</p>"; return;
+    }
+    filtered.forEach(b=>{
+      const emprunt = loans.find(l=>l.bookId===b.id);
+      const li = document.createElement("li");
+      li.className="book-item lang-"+b.langue.replace(/\s/g,"");
+      li.innerHTML=`
+        <div class="book-left">
+          <strong>${b.titre}</strong>
+          <span class="meta">${b.auteur}</span>
+          <span class="meta">${b.langue}</span>
+          ${emprunt ? `<span class="badge">Emprunté par ${emprunt.user}</span>`:`<span class="badge">Disponible</span>`}
+        </div>
+        <div class="actions">
+          <button class="action-btn" onclick="borrowOrReturn('${b.id}')">
+            ${emprunt && emprunt.user===currentUser().id?"Retourner":"Emprunter"}
+          </button>
+        </div>`;
+      booksList.appendChild(li);
+    });
+  }
+
+  /* -------------------- Emprunter / Retourner -------------------- */
+  window.borrowOrReturn = function(bookId){
+    const u = currentUser();
+    if(!u) return;
+    const emprunt = loans.find(l=>l.bookId===bookId && l.user===u.id);
+    if(emprunt){
+      // Rendre
+      if(confirm("Rendre ce livre ?")){
+        loans = loans.filter(l=>!(l.bookId===bookId && l.user===u.id));
+        save(); afficherLivres(); afficherEmprunts();
+      }
+      return;
+    }
+    // Emprunter
+    loans.unshift({id:crypto.randomUUID(), bookId, user:u.id, date:new Date().toISOString()});
+    save(); afficherLivres(); afficherEmprunts();
+  }
+
+  /* -------------------- Afficher emprunts -------------------- */
+  const loansTable = document.getElementById("loansTable");
+  function afficherEmprunts(){
+    const u = currentUser();
+    loansTable.innerHTML="";
+    const mesEmprunts = loans.filter(l=>l.user===u?.id);
+    if(mesEmprunts.length===0){
+      loansTable.innerHTML="<p class='muted'>Aucun emprunt.</p>"; return;
+    }
+    mesEmprunts.forEach(l=>{
+      const book = books.find(b=>b.id===l.bookId);
+      const div=document.createElement("div");
+      div.className="loan-item";
+      div.innerHTML=`<strong>${book?.titre || "Livre supprimé"}</strong><br>Date : ${new Date(l.date).toLocaleDateString()}`;
+      loansTable.appendChild(div);
+    });
+  }
+
+  /* -------------------- Initialisation -------------------- */
+  afficherLivres();
+  afficherEmprunts();
+
+});
+</script>
 </head>
 <body>
 
@@ -32,64 +196,39 @@
 
   <!-- APP -->
   <section id="appSection" class="hidden">
-
     <div class="card row space">
-      <div>
-        <h2 id="welcome">Bienvenue</h2>
-      </div>
-      <div class="small">
-        <button id="btnLogout" class="danger">Se déconnecter</button>
-      </div>
+      <h2 id="welcome">Bienvenue</h2>
+      <button id="btnLogout" class="danger">Se déconnecter</button>
     </div>
 
-    <!-- CONTROLS -->
-    <section class="card grid-2">
-      <div>
-        <h3>Ajouter un livre</h3>
-        <div class="form-grid">
-          <input id="titre" placeholder="Titre" />
-          <input id="auteur" placeholder="Auteur" />
-          <select id="langue">
-            <option>Français</option>
-            <option>Anglais</option>
-            <option>Lao</option>
-          </select>
-        </div>
-        <div class="row">
-          <button id="btnAdd" class="primary">Ajouter</button>
-          <button id="btnClearForm" class="outline">Effacer</button>
-        </div>
-      </div>
-
-      <div>
-        <h3>Outils</h3>
-        <div class="form-grid">
-          <input id="search" placeholder="Rechercher titre ou auteur..." />
-          <input id="qrUrl" placeholder="URL pour QR code" />
-        </div>
-        <div class="row">
-          <button id="btnQR" class="outline">Générer QR</button>
-        </div>
-        <div class="row" style="margin-top:8px;">
-          <button id="btnExport" class="outline">Exporter JSON</button>
-          <label class="btn-file outline">
-            Importer JSON / Excel <input id="fileImport" type="file" accept=".json,.xlsx,.xls" />
-          </label>
-        </div>
-        <div id="qrcode" class="qrcode"></div>
-      </div>
-    </section>
-
-    <!-- LIVRES EMPRUNTÉS -->
+    <!-- Ajouter un livre -->
     <section class="card">
-      <h3>Livres empruntés</h3>
-      <div id="loansTable"></div>
+      <h3>Ajouter un livre</h3>
+      <div class="form-grid">
+        <input id="titre" placeholder="Titre" />
+        <input id="auteur" placeholder="Auteur" />
+        <select id="langue">
+          <option>Français</option>
+          <option>Anglais</option>
+          <option>Lao</option>
+        </select>
+      </div>
+      <div class="row">
+        <button id="btnAdd" class="primary">Ajouter</button>
+      </div>
     </section>
 
-    <!-- LISTE DES LIVRES -->
+    <!-- Liste des livres -->
     <section class="card">
       <h3>Liste des livres</h3>
+      <input id="search" placeholder="Rechercher titre ou auteur..." />
       <ul id="booksList" class="books"></ul>
+    </section>
+
+    <!-- Livres empruntés -->
+    <section class="card">
+      <h3>Mes emprunts</h3>
+      <div id="loansTable"></div>
     </section>
 
   </section>
@@ -97,7 +236,7 @@
 </main>
 
 <footer class="footer">
-  <small>Stockage local (LocalStorage) · Export/Import JSON / Excel</small>
+  <small>Stockage local · Emprunter / Rendre / Ajouter</small>
 </footer>
 
 </body>
